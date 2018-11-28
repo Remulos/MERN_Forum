@@ -9,7 +9,7 @@ const app = express();
 const user = require('./routes/api/user');
 const profile = require('./routes/api/profile');
 const post = require('./routes/api/post');
-const files = require('./routes/api/files');
+const test = require('./routes/api/test');
 
 // bodyParser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -23,7 +23,7 @@ mongoose
 		uri,
 		{ useNewUrlParser: true }
 	)
-	.then(() => console.log('MongoDB connected'))
+	.then()
 	.catch(err => console.log(err));
 
 const db = mongoose.connection;
@@ -34,7 +34,7 @@ db.on('connecting', () =>
 );
 
 db.on('connected', () =>
-	console.log(`Mongoose default connection is open to ${uri}`)
+	console.log(`Mongoose default connection is open to ${uri} on port ${port}`)
 );
 
 db.on('error', err =>
@@ -64,7 +64,7 @@ require('./config/passport')(passport);
 app.use('/user', user);
 app.use('/profile', profile);
 app.use('/post', post);
-app.use('/files', files);
+app.use('/test', test);
 
 const port = process.env.PORT || 5000;
 
