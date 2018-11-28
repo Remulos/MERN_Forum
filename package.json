@@ -1,25 +1,40 @@
 {
-  "name": "tactical-advance",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
-    "react-scripts": "2.1.1"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+	"name": "tactical-advance",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"bcryptjs": "^2.4.3",
+		"body-parser": "^1.18.3",
+		"express": "^4.16.4",
+		"gridfs-stream": "^1.1.1",
+		"jsonwebtoken": "^8.4.0",
+		"mongodb": "^3.1.10",
+		"mongoose": "^5.3.13",
+		"multer": "^1.4.1",
+		"multer-gridfs-storage": "^3.2.3",
+		"passport": "^0.4.0",
+		"passport-jwt": "^4.0.0",
+		"react": "^16.6.3",
+		"react-dom": "^16.6.3",
+		"react-scripts": "2.1.1"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject",
+		"server": "nodemon server.js"
+	},
+	"eslintConfig": {
+		"extends": "react-app"
+	},
+	"browserslist": [
+		">0.2%",
+		"not dead",
+		"not ie <= 11",
+		"not op_mini all"
+	],
+	"devDependencies": {
+		"nodemon": "^1.18.6"
+	}
 }
