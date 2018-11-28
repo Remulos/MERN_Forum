@@ -16,7 +16,7 @@ router.get('/test', (req, res) => res.json({ msg: 'success' }));
 // @route   POST /user/register
 // @desc    Register new user
 // @access  Public
-router.post('/register', (req, res) => {
+router.post('/register',(req, res) => {
 	const errors = {};
 
 	// Search existing users by email to see if account already exists
