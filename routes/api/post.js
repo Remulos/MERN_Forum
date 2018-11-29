@@ -12,21 +12,42 @@ const Profile = require('../../models/Post');
 // @access  Public
 router.get('/test', (req, res) => res.json({ success: true }));
 
-// @route   POST post/
-// @desc    Create Post
-// @access  Public
-router.post(
-	'/',
-	passport.authenticate('jwt', { session: false }),
-	(req, res) => {
-		const errors = {};
+mongoose.connection.on('connected', () => {
+	// File upload middleware
+	const multerSetUp = require('../../src/modules/gridFsStorage');
 
-		const newPost = {
-			title: req.body.title,
-			text: req.body.text,
-			category: req.body.category,
-		};
-	}
-);
+	// @route   POST post/
+	// @desc    Create Post
+	// @access  Public
+	router.post(
+		'/',
+		passport.authenticate('jwt', { session: false }),
+		multerSetUp,
+		(req, res) => {
+			const errors = {};
+
+			const newPost = {
+				title: req.body.title,
+				text: req.body.text,
+				category: req.body.category,
+			};
+
+			if (req.files.length > 0) {
+				req.file.forEach(file => {});
+			}
+
+			Profile.findOne({ user: req.user.id }).then(profile => {
+				if (!profile) {
+					errors.noprofile = 'Cannot find profile';
+					res.status(404).json(errors);
+				} else {
+					req.files.forEach(file => {
+						profile.uploads.unshift({ uploadid: file.id });
+					});
+				}
+			});
+		}
+	);
+});
 
 module.exports = router;

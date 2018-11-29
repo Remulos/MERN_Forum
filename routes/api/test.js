@@ -5,9 +5,13 @@ const multer = require('multer');
 const path = require('path');
 const GridFSStorage = require('multer-gridfs-storage');
 const crypto = require('crypto');
+const passport = require('passport');
+
+const User = require('../../models/User');
 
 let upload;
 
+// Multer storage engine
 mongoose.connection.on('connected', () => {
 	if (mongoose.connection.readyState === 1) {
 		const storage = new GridFSStorage({
@@ -36,43 +40,32 @@ mongoose.connection.on('connected', () => {
 	}
 });
 
-mongoose.connection.once('connected', () => {
-	router.post('/test2', upload.single('file'), (req, res) => {
-		// TODO
-		// Add info to Profile
-		// Add authentication method before upload
-		res.json({ msg: 'success' });
-	});
+mongoose.connection.on('connected', () => {
+	const multerSetUp = require('../../src/modules/gridFsStorage');
+	router.post(
+		'/test3',
+		passport.authenticate('jwt', { session: false }),
+		multerSetUp,
+		(req, res) => {
+			const errors = {};
+
+			User.findById(req.user.id).then(user => {
+				if (!user) {
+					errors.nouser = 'Cannot find user';
+					res.status(404).json(errors);
+				} else {
+					req.files.forEach(file => {
+						user.uploads.unshift({ uploadid: file.id });
+					});
+					user.save()
+						.then(user =>
+							res.json({ user: user, files: req.files })
+						)
+						.catch(err => res.json(err));
+				}
+			});
+		}
+	);
 });
 
 module.exports = router;
-
-// ------------------------------------------Working!! Upload!!----------------------------------------------------
-// ----------------------------------------------------------------------------------------------------------------
-/* const fs = require('fs');
-const mongodb = require('mongodb');
-
-router.post(
-	'/',
-	multer({ dest: '../../uploads' }).single('file'),
-	(req, res) => {
-		test(req, res);
-	}
-);
-
-const test = (req, res) => {
-	if (mongoose.connection.readyState === 1) {
-		const bucket = new mongodb.GridFSBucket(mongoose.connection.db);
-
-		fs.createReadStream(`../../uploads/${req.file.filename}`)
-			.pipe(bucket.openUploadStream(req.file.filename))
-			.on('error', err => {
-				console.log(err);
-			})
-			.on('finish', () => {
-				res.json({ msg: 'file uploaded successfully' });
-			});
-	} else {
-		res.json();
-	}
-}; */

@@ -67,7 +67,7 @@ const PostSchema = new Schema({
 			},
 			images: [
 				{
-					link: {
+					uploadid: {
 						type: String,
 						required: true,
 					},

@@ -6,7 +6,6 @@ const passport = require('passport');
 
 // Load User model to use in mongoose
 const User = require('../../models/User');
-const Profile = require('../../models/Profile');
 
 // @route   GET /user/test
 // @desc    Test route
@@ -16,7 +15,7 @@ router.get('/test', (req, res) => res.json({ msg: 'success' }));
 // @route   POST /user/register
 // @desc    Register new user
 // @access  Public
-router.post('/register',(req, res) => {
+router.post('/register', (req, res) => {
 	const errors = {};
 
 	// Search existing users by email to see if account already exists
@@ -54,12 +53,7 @@ router.post('/register',(req, res) => {
 						// p.s. .save() is a mongoose function
 						newUser
 							.save()
-							.then(user => {
-								const newProfile = new Profile({
-									user: user.id,
-								});
-								newProfile.save().then(res.json(user));
-							})
+							.then(user => res.json(user))
 							.catch(err => console.log(err));
 					});
 				});
@@ -116,11 +110,11 @@ router.post('/login', (req, res) => {
 	});
 });
 
-// @route   GET /user/account
+// @route   GET /user
 // @desc    Get user account settings
 // @access  Private
 router.get(
-	'/account',
+	'/',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
 		User.findById(req.user.id)
@@ -135,11 +129,11 @@ router.get(
 	}
 );
 
-// @route   POST /user/account/edit
+// @route   POST /user/edit
 // @desc    Edit user model values
 // @access  Private
 router.post(
-	'/account/edit',
+	'/edit',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
 		const accountSettings = {};
@@ -218,6 +212,16 @@ router.post(
 			accountSettings.preferences.eventreminders =
 				req.body.eventreminders;
 
+		if (req.body.avatar) accountSettings.avatar = req.body.avatar;
+		if (req.body.coverphoto)
+			accountSettings.coverphoto = req.body.coverphoto;
+		if (req.body.gender) accountSettings.gender = req.body.gender;
+		if (req.body.location) accountSettings.location = req.body.location;
+
+		if (typeof req.body.interests !== 'undefined') {
+			accountSettings.interests = req.body.interests.split(',');
+		}
+
 		User.findByIdAndUpdate(
 			req.user.id,
 			{ $set: accountSettings },
@@ -225,6 +229,231 @@ router.post(
 		)
 			.then(user => res.json(user))
 			.catch(err => res.json(err));
+	}
+);
+
+// @route   POST /user/comment
+// @desc    Add record of comment to user profile
+// @access  Private
+router.post(
+	'/comment',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const errors = {};
+
+		User.findById(req.user.id).then(user => {
+			if (!user) {
+				errors.nouser = 'Cannot find user';
+				res.status(404).json(errors);
+			} else {
+				const comment = { commentid: req.body.commentid };
+				if (
+					user.comments.some(
+						({ commentid }) => commentid === req.body.commentid
+					)
+				) {
+					errors.commentexists = 'This commentid already exists';
+					res.status(404).json(errors);
+				} else {
+					user.comments.unshift(comment);
+					user.save()
+						.then(user => res.json(user))
+						.catch(err => res.json(err));
+				}
+			}
+		});
+	}
+);
+
+// @route   DELETE /user/comment
+// @desc    Delete record of comment
+// @access  Private
+router.delete(
+	'/comment',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const errors = {};
+
+		User.findById(req.user.id).then(user => {
+			if (!user) {
+				errors.nouser = 'Cannot find user';
+				res.status(404).json(errors);
+			} else {
+				if (
+					user.comments.some(
+						({ commentid }) => commentid === req.body.commentid
+					)
+				) {
+					const removeIndex = user.comments
+						.map(comment => comment.commentid)
+						.indexOf(req.body.commentid);
+
+					user.comments.splice(removeIndex, 1);
+					user.save()
+						.then(user => res.json(user))
+						.catch(err => res.json(err));
+				} else {
+					errors.nocomment = 'No comment with this id to remove';
+					res.status(404).json(errors);
+				}
+			}
+		});
+	}
+);
+
+// @route   POST /user/like
+// @desc    Add record of likes to user profile
+// @access  Private
+router.post(
+	'/like',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const errors = {};
+
+		const like = { likeid: req.body.likeid };
+
+		User.findById(req.user.id).then(user => {
+			if (!user) {
+				errors.nouser = 'Cannot find user';
+				res.status(404).json(errors);
+			} else {
+				if (
+					user.likes.some(({ likeid }) => likeid === req.body.likeid)
+				) {
+					errors.alreadyliked = 'User has already liked this';
+					res.status(404).json(errors);
+				} else {
+					user.likes.unshift(like);
+					user.save()
+						.then(user => res.json(user))
+						.catch(err => res.json(err));
+				}
+			}
+		});
+	}
+);
+
+// @route   DELETE /user/like
+// @desc    Remove record of like
+// @access  Private
+router.delete(
+	'/like',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const errors = {};
+
+		const like = { likeid: req.body.likeid };
+
+		// Find the logged in user
+		User.findById(req.user.id).then(user => {
+			if (!user) {
+				errors.nouser = 'Cannot find user';
+				res.status(404).json(errors);
+			} else {
+				// Check that the likeid already exists in the user and then splice out of likes array
+				if (
+					user.likes.some(({ likeid }) => likeid === req.body.likeid)
+				) {
+					const removeIndex = user.likes
+						.map(like => like.likeid)
+						.indexOf(req.body.likeid);
+
+					user.likes.splice(removeIndex, 1);
+					user.save()
+						.then(user => res.json(user))
+						.catch(err => res.json(err));
+				} else {
+					errors.like = 'Already unliked';
+					res.status(404).json(errors);
+				}
+			}
+		});
+	}
+);
+
+// @route   POST /user/club
+// @desc    Add / Edit record of club membership to user
+// @access  Private
+router.post(
+	'/club',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const errors = {};
+
+		// Find the user for the logged in user
+		User.findById(req.user.id).then(user => {
+			if (!user) {
+				errors.nouser = 'Cannot find user';
+				res.status(404).json(errors);
+			} else {
+				const club = {};
+				club.clubid = req.body.clubid;
+				if (req.body.clubname) club.name = req.body.clubname;
+				if (req.body.role) club.role = req.body.role;
+				if (req.body.permissions)
+					club.permissions = req.body.permissions;
+
+				if (
+					user.clubs.some(({ clubid }) => clubid === req.body.clubid)
+				) {
+					const removeIndex = user.clubs
+						.map(club => club.clubid)
+						.indexOf(req.body.clubid);
+
+					if (!club.permissions)
+						club.permissions = user.clubs[removeIndex].permissions;
+					if (!club.name) club.name = user.clubs[removeIndex].name;
+					if (!club.role) club.role = user.clubs[removeIndex].role;
+
+					user.clubs.splice(removeIndex, 1);
+					user.clubs.push(club);
+					user.save()
+						.then(user => res.json(user))
+						.catch(err => res.json(err));
+				} else {
+					user.clubs.push(club);
+					user.save()
+						.then(user => res.json(user))
+						.catch(err => res.json(err));
+				}
+			}
+		});
+	}
+);
+
+// @route   DELETE /user/club
+// @desc    Delete record of club membership from user
+// @access  Private
+router.delete(
+	'/club',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const errors = {};
+
+		// Find the user for the logged in user
+		User.findById(req.user.id).then(user => {
+			if (!user) {
+				errors.nouser = 'Cannot find user';
+				res.status(404).json(errors);
+			} else {
+				// Find a club with the correct clubid
+				if (
+					user.clubs.some(({ clubid }) => clubid === req.body.clubid)
+				) {
+					const removeIndex = user.clubs
+						.map(club => club.clubid)
+						.indexOf(req.body.clubid);
+
+					user.clubs.splice(removeIndex, 1);
+					user.save()
+						.then(user => res.json(user))
+						.catch(err => res.json(err));
+				} else {
+					errors.club = 'Not a member of this club';
+					res.status(404).json(errors);
+				}
+			}
+		});
 	}
 );
 

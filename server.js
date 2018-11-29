@@ -7,7 +7,6 @@ const app = express();
 
 // Load route files
 const user = require('./routes/api/user');
-const profile = require('./routes/api/profile');
 const post = require('./routes/api/post');
 const test = require('./routes/api/test');
 
@@ -62,7 +61,6 @@ require('./config/passport')(passport);
 
 // Setup routes
 app.use('/user', user);
-app.use('/profile', profile);
 app.use('/post', post);
 app.use('/test', test);
 

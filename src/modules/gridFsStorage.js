@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
-const crypto = require('crypto');
-const GridFSStorage = require('multer-gridfs-storage');
+const multer = require('multer');
 const path = require('path');
+const GridFSStorage = require('multer-gridfs-storage');
+const crypto = require('crypto');
 
-let storage;
+let upload;
 
-mongoose.connection.on('connected', () => {
+const multerSetUp = () => {
+	let storage;
 	if (mongoose.connection.readyState === 1) {
 		storage = new GridFSStorage({
 			db: mongoose.connection.db,
@@ -20,7 +22,7 @@ mongoose.connection.on('connected', () => {
 							path.extname(file.originalname);
 						const fileInfo = {
 							filename: filename,
-							metadata: { uploader_user_id: req.user.id },
+							metadata: { uploader_user_id: req.body.id },
 						};
 						resolve(fileInfo);
 					});
@@ -28,9 +30,12 @@ mongoose.connection.on('connected', () => {
 			},
 		});
 	} else {
-		console.log({ msg: 'Failure' });
+		console.log({ msg: 'No mongoose connection found' });
 	}
-	return storage;
-});
+	upload = multer({ storage: storage }).array('file', 10);
+	return upload;
+};
 
-module.exports = storage;
+multerSetUp();
+
+module.exports = upload;
