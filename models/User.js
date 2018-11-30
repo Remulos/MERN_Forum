@@ -18,6 +18,9 @@ const UserSchema = new Schema({
 		type: String,
 		required: true,
 	},
+	about: {
+		type: String,
+	},
 	date: {
 		type: Date,
 		default: Date.now,
@@ -30,6 +33,9 @@ const UserSchema = new Schema({
 		type: String,
 	},
 	timezone: {
+		type: String,
+	},
+	role: {
 		type: String,
 	},
 	preferences: {
@@ -254,7 +260,7 @@ const UserSchema = new Schema({
 	],
 	uploads: [
 		{
-			uploadid: {
+			uploadPath: {
 				type: String,
 				required: true,
 			},

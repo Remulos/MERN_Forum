@@ -20,13 +20,19 @@ if (isMaster) {
 	const mongoose = require('mongoose');
 	const bodyParser = require('body-parser');
 	const passport = require('passport');
+	const scheduler = require('node-schedule');
+	const fs = require('fs');
 
 	const app = express();
+
+	// Load models
+	const User = require('./models/User');
 
 	// Load route files
 	const user = require('./routes/api/user');
 	const post = require('./routes/api/post');
 	const test = require('./routes/api/test');
+	const admin = require('./routes/api/admin');
 
 	// bodyParser middleware
 	app.use(bodyParser.urlencoded({ extended: false }));
@@ -83,6 +89,22 @@ if (isMaster) {
 	app.use('/user', user);
 	app.use('/post', post);
 	app.use('/test', test);
+	app.use('/admin', admin);
+
+	// Scheduled db stats query
+
+	scheduler.scheduleJob('* 0 * * *', () => {
+		User.countDocuments((err, count) => {
+			fs.readFile('./logs/users.json', (err, data) => {
+				const json = JSON.parse(data);
+				const timestamp = Date.now();
+				json.push({ count: count, timestamp: timestamp });
+				fs.writeFile('./logs/users.json', JSON.stringify(json), err => {
+					if (err) throw err;
+				});
+			});
+		});
+	});
 
 	const port = process.env.PORT || 5000;
 

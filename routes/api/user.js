@@ -129,6 +129,45 @@ router.get(
 	}
 );
 
+// @route   GET /user
+// @desc    Find users by handle
+// @access  Private
+router.get(
+	'/user',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		User.find({ handle: { $regex: req.body.handle } })
+			.then(user => {
+				const users = [];
+				user.forEach(user => {
+					const foundUser = {};
+
+					foundUser.handle = user.handle;
+					foundUser.date = user.date;
+					foundUser.dob = user.dob;
+					foundUser.avatar = user.avatar;
+					foundUser.coverphoto = user.coverphoto;
+					foundUser.reputation = user.reputation;
+					foundUser.interests = user.interests;
+					foundUser.about = user.about;
+					foundUser.rank = user.rank;
+					foundUser.gender = user.gender;
+					foundUser.location = user.location;
+					foundUser.clubs = user.clubs;
+					foundUser.contentCount = user.contentCount;
+					foundUser.posts = user.posts;
+					foundUser.comments = user.comments;
+					foundUser.ships = user.ships;
+					foundUser.uploads = user.uploads;
+
+					users.push(foundUser);
+				});
+				res.json(users);
+			})
+			.catch(err => res.json(err));
+	}
+);
+
 // @route   POST /user/edit
 // @desc    Edit user model values
 // @access  Private
@@ -456,5 +495,15 @@ router.delete(
 		});
 	}
 );
+
+// TODO
+// @route   POST /user/post
+// @desc    Add record of post to user
+// @access  Private
+
+// TODO
+// @route   DELETE /user/post
+// @desc    Delete record of post to user
+// @access  Private
 
 module.exports = router;
