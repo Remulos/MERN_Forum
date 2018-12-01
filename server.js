@@ -82,6 +82,15 @@ app.use('/user', user);
 app.use('/post', post);
 app.use('/file', file);
 app.use('/admin', admin);
+app.use('/test', require('./routes/api/test'));
+
+// Basic error handler
+//app.use((err, req, res) => {
+//console.error(err);
+// If our routes specified a specific response, then send that. Otherwise,
+// send a generic message so as not to leak anything.
+//res.status(500).send(err.response || 'Something broke!');
+//});
 
 // Scheduled db stats query
 

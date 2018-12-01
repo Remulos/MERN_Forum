@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
+const recursive = require('recursive-readdir');
 
 const User = require('../../models/User');
 const Post = require('../../models/Post');
@@ -20,7 +21,7 @@ const requireRole = role => {
 // @desc    Get total number of users
 // @access  Admin
 router.get(
-	'/users-total',
+	'/total-users',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('admin'),
 	(req, res) => {
@@ -38,7 +39,7 @@ router.get(
 // @desc    Get total number of posts in database
 // @access  Admin
 router.get(
-	'/posts-total',
+	'/total-posts',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('admin'),
 	(req, res) => {
@@ -47,6 +48,24 @@ router.get(
 				res.json(err);
 			} else {
 				res.json(count);
+			}
+		});
+	}
+);
+
+// @route   GET /admin/uploads
+// @desc    Get total number of uploads in file system
+// @access  Admin
+router.get(
+	'/total-uploads',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('admin'),
+	(req, res) => {
+		recursive('./uploads', (err, files) => {
+			if (err) res.json(err);
+			if (files) {
+				const numFiles = files.length;
+				res.json(numFiles);
 			}
 		});
 	}
