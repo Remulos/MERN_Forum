@@ -4,10 +4,9 @@ const passport = require('passport');
 const fs = require('fs');
 
 // Load models
-const User = require('../../models/User');
 const Upload = require('../../models/Upload');
 
-// Load multer storage method
+// Load multer storage middleware method
 const generateUpload = require('../../src/modules/uploadDestination');
 
 // @route   GET /file/test
@@ -23,13 +22,13 @@ router.post(
 	passport.authenticate('jwt', { session: false }),
 	generateUpload.array('file'),
 	(req, res) => {
-		const errors = {};
-
 		if (!req.files) {
 			res.status(404).json({ error: 'No files found' });
 		} else {
+			// Create uploads variable for returned upload documents
 			const uploads = [];
 
+			// Cycle through all files in request, add attributes to new Upload object and save to uploads collection. Then add saved object to 'uploads' array.
 			req.files.forEach(file => {
 				const upload = new Upload({
 					filename: file.filename,
@@ -73,26 +72,24 @@ router.delete(
 	'/',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		const errors = {};
-		const stage1 = {};
 		if (!req.body.fileid) {
 			res.status(400).json({
 				NoID: 'Delete request contains no file ID',
 			});
 		} else {
+			// Find the Upload document in the database based by document id.
 			Upload.findOne({ _id: req.body.fileid }, (err, upload) => {
 				if (err) {
 					res.status(404).json({
 						IncorrectID: 'No file with this ID was found.',
 					});
 				} else {
-					console.log(
-						upload.user + ' ' + req.user.id + ' ' + req.user.role
-					);
+					// Check that current user has permissions to delete the file.
 					if (
 						upload.user === req.user.id ||
 						req.user.role === 'admin'
 					) {
+						// Delete the record of the file from the database and use the returned document to delete(unlink) the file from the file system in the callback.
 						Upload.findOneAndDelete(
 							{ _id: req.body.fileid },
 							(err, upload) => {
@@ -106,6 +103,7 @@ router.delete(
 										if (err) {
 											res.status(400).json(err);
 										} else {
+											// Return both the deleted database document and a successfull delete message.
 											res.status(200).json({
 												stage1: upload,
 												stage2:

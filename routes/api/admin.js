@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const recursive = require('recursive-readdir');
 
+// Load models
 const User = require('../../models/User');
 const Post = require('../../models/Post');
 
@@ -79,6 +80,7 @@ router.get(
 	passport.authenticate('jwt', { session: false }),
 	requireRole('admin'),
 	(req, res) => {
+		// Search entire 'users' collection by handle for the regular expression of the search query
 		User.find({ handle: { $regex: req.query.handle, $options: 'i' } })
 			.then(user => {
 				res.status(200).json(user);
@@ -117,6 +119,7 @@ router.post(
 	(req, res) => {
 		User.findById(req.params.id)
 			.then(user => {
+				// Create an object to store all configurable user settings and if new values are in the request body, add them to the object.
 				const accountSettings = {};
 				if (req.body.name) accountSettings.name = req.body.name;
 				if (req.body.handle) accountSettings.handle = req.body.handle;
@@ -212,6 +215,7 @@ router.post(
 					accountSettings.interests = req.body.interests.split(',');
 				}
 
+				// Re-find user by id, update with new settings and return the new user object.
 				User.findByIdAndUpdate(
 					user.id,
 					{ $set: accountSettings },
@@ -219,11 +223,9 @@ router.post(
 				)
 					.then(user => res.status(201).json(user))
 					.catch(err =>
-						res
-							.status(400)
-							.json({
-								error: 'Unable to update user information.',
-							})
+						res.status(400).json({
+							error: 'Unable to update user information.',
+						})
 					);
 			})
 			.catch(err =>
@@ -243,29 +245,10 @@ router.delete(
 	requireRole('admin'),
 	(req, res) => {
 		User.findById(req.body.id).then(user => {
-			if (req.body.posts === true && user.posts.length !== 0) {
-				user.posts.forEach(post => {
-					Post.findByIdAndDelete(post.id)
-						.then()
-						.catch(err =>
-							res
-								.status(400)
-								.json({
-									Error:
-										'Unable to delete posts from this user.',
-								})
-						);
-				});
-			}
-			// TODO - delete user uploads
-			user.remove((err, user) => {
-				if (err) {
-					res.status(400).json({
-						error: 'Unable to delete user record.',
-					});
-				}
-				res.status(200).json(user);
-			});
+			// TODO - Find and delete all user posts?
+			// TODO - Find and delete all user uploads
+			// TODO - Find and remove all user likes
+			// TODO - Find and delete all user comments
 		});
 	}
 );

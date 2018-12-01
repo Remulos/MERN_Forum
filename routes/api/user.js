@@ -18,19 +18,21 @@ router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 router.post('/register', (req, res) => {
 	const errors = {};
 
-	// Search existing users by email to see if account already exists
+	// Search existing users by email to see if account already exists.
 	User.findOne({ email: req.body.email }).then(user => {
-		// If that account already exists, return an error message
+		// If that account already exists, return an error message.
 		if (user) {
 			errors.email = 'An account with this email already exists';
 			res.status(400).json(errors);
 		} else {
+			// Search existing users by handle to see if the requested handle is already taken.
 			User.findOne({ handle: req.body.handle }).then(user => {
-				// If a user doesn't already exist, populate a new object with request field data
+				// If a user doesn't already exist, populate a new object with request field data.
 				if (user) {
 					errors.handle = 'This handle is not available';
 					res.status(400).json(errors);
 				}
+				// If handle isn't taken, create new User document and save it to the 'users' collection.
 				const newUser = new User({
 					name: req.body.name,
 					handle: req.body.handle,
@@ -41,16 +43,15 @@ router.post('/register', (req, res) => {
 					timezone: req.body.timezone,
 				});
 
-				// First generate the salt with a callback function
+				// First generate the salt with a callback function.
 				bcrypt.genSalt(10, (err, salt) => {
-					// Inside the call back function hash the new users password
+					// Inside the call back function hash the new users password.
 					bcrypt.hash(newUser.password, salt, (err, hash) => {
 						if (err) throw err;
-						// Change the new users password to the new hash string
+						// Change the new users password to the new hash string.
 						newUser.password = hash;
 
-						// Save the whole new user object to MongoDB and return it as json
-						// p.s. .save() is a mongoose function
+						// Save the whole new user object to MongoDB and return it as json.
 						newUser
 							.save()
 							.then(user => res.status(201).json(user))
@@ -117,6 +118,7 @@ router.get(
 	'/',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
+		// Search for the user document with id matching id returned from the passport strategy.
 		User.findById(req.user.id)
 			.then(user => {
 				if (!user) {
@@ -143,9 +145,12 @@ router.get(
 	//passport.authenticate('jwt', { session: false }),
 	(req, res) => {
 		console.log(req.query.handle);
+		// Find all users with handles matching the regular expression of the request query parameters.
 		User.find({ handle: { $regex: req.query.handle, $options: 'i' } })
 			.then(user => {
+				// Create an array for the restricted user documents.
 				const users = [];
+				// Cycle through eact returned user and add data to the foundUser object that is suitable for public viewing (no email addresses, etc.).
 				user.forEach(user => {
 					const foundUser = {};
 
@@ -167,6 +172,7 @@ router.get(
 					foundUser.ships = user.ships;
 					foundUser.uploads = user.uploads;
 
+					// Add restricted user object to users array
 					users.push(foundUser);
 				});
 				res.status(200).json(users);
@@ -185,6 +191,7 @@ router.get(
 router.get('/profile/:handle', (req, res) => {
 	User.findOne({ handle: req.params.handle })
 		.then(user => {
+			// Create an object to store user data to exclude data that shouldn't be available publicly.
 			const foundUser = {};
 
 			foundUser.handle = user.handle;
@@ -219,6 +226,7 @@ router.post(
 	'/edit',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
+		// Create object for updated user settings and only add settings if specified in request body.
 		const accountSettings = {};
 		if (req.body.name) accountSettings.name = req.body.name;
 		if (req.body.handle) accountSettings.handle = req.body.handle;
@@ -301,10 +309,12 @@ router.post(
 		if (req.body.gender) accountSettings.gender = req.body.gender;
 		if (req.body.location) accountSettings.location = req.body.location;
 
+		// CSV - seperate the req.body.interests value by commas
 		if (typeof req.body.interests !== 'undefined') {
 			accountSettings.interests = req.body.interests.split(',');
 		}
 
+		// Use the user id returned from the passport strategy and use it to find and update the user document using the accountSettings object.
 		User.findByIdAndUpdate(
 			req.user.id,
 			{ $set: accountSettings },
