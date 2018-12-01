@@ -10,7 +10,7 @@ const User = require('../../models/User');
 // @route   GET /user/test
 // @desc    Test route
 // @access  Public
-router.get('/test', (req, res) => res.json({ msg: 'success' }));
+router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 
 // @route   POST /user/register
 // @desc    Register new user
@@ -53,7 +53,7 @@ router.post('/register', (req, res) => {
 						// p.s. .save() is a mongoose function
 						newUser
 							.save()
-							.then(user => res.json(user))
+							.then(user => res.status(201).json(user))
 							.catch(err => console.log(err));
 					});
 				});
@@ -95,7 +95,7 @@ router.post('/login', (req, res) => {
 						keys.secretOrKey,
 						{ expiresIn: '12h' },
 						(err, token) => {
-							res.json({
+							res.status(200).json({
 								success: true,
 								token: 'Bearer ' + token,
 							});
@@ -121,22 +121,28 @@ router.get(
 			.then(user => {
 				if (!user) {
 					errors.nouser = 'Account settings not found.';
-					res.status(400).json(errors);
+					res.status(404).json(errors);
 				}
-				res.json({ user });
+				res.status(200).json({ user });
 			})
-			.catch(err => res.status(404).json(err));
+			.catch(err =>
+				res.status(401).json({
+					error: 'Invalid token. Please sign in to view profile.',
+				})
+			);
 	}
 );
 
-// @route   GET /user
+// @route   GET /user/find?handle
 // @desc    Find users by handle
 // @access  Private
 router.get(
-	'/user',
-	passport.authenticate('jwt', { session: false }),
+	'/find',
+	// Uncomment this to make user profile private
+	//passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		User.find({ handle: { $regex: req.body.handle } })
+		console.log(req.query.handle);
+		User.find({ handle: { $regex: req.query.handle, $options: 'i' } })
 			.then(user => {
 				const users = [];
 				user.forEach(user => {
@@ -162,16 +168,20 @@ router.get(
 
 					users.push(foundUser);
 				});
-				res.json(users);
+				res.status(200).json(users);
 			})
-			.catch(err => res.json(err));
+			.catch(err =>
+				res.status(404).json({
+					error: 'No accounts with that handle could be found.',
+				})
+			);
 	}
 );
 
-// @route   GET /user/:handle
+// @route   GET /user/profile/:handle
 // @desc    View user profile
 // @access  Public
-router.get('/:handle', (req, res) => {
+router.get('/profile/:handle', (req, res) => {
 	User.findOne({ handle: req.params.handle })
 		.then(user => {
 			const foundUser = {};
@@ -194,9 +204,11 @@ router.get('/:handle', (req, res) => {
 			foundUser.ships = user.ships;
 			foundUser.uploads = user.uploads;
 
-			res.json(foundUser);
+			res.status(200).json(foundUser);
 		})
-		.catch(err => res.status(404).json(err));
+		.catch(err =>
+			res.status(404).json({ error: 'No User found with this handle.' })
+		);
 });
 
 // @route   POST /user/edit
@@ -297,8 +309,10 @@ router.post(
 			{ $set: accountSettings },
 			{ new: true }
 		)
-			.then(user => res.json(user))
-			.catch(err => res.json(err));
+			.then(user => res.status(200).json(user))
+			.catch(err =>
+				res.status(404).json({ error: 'Unable top find user account.' })
+			);
 	}
 );
 
@@ -311,27 +325,34 @@ router.post(
 	(req, res) => {
 		const errors = {};
 
-		User.findById(req.user.id).then(user => {
-			if (!user) {
-				errors.nouser = 'Cannot find user';
-				res.status(404).json(errors);
-			} else {
-				const comment = { commentid: req.body.commentid };
-				if (
-					user.comments.some(
-						({ commentid }) => commentid === req.body.commentid
-					)
-				) {
-					errors.commentexists = 'This commentid already exists';
+		User.findById(req.user.id)
+			.then(user => {
+				if (!user) {
+					errors.nouser = 'Cannot find user';
 					res.status(404).json(errors);
 				} else {
-					user.comments.unshift(comment);
-					user.save()
-						.then(user => res.json(user))
-						.catch(err => res.json(err));
+					const comment = { commentid: req.body.commentid };
+					if (
+						user.comments.some(
+							({ commentid }) => commentid === req.body.commentid
+						)
+					) {
+						errors.commentexists = 'This commentid already exists';
+						res.status(404).json(errors);
+					} else {
+						user.comments.unshift(comment);
+						user.save()
+							.then(user => res.status(201).json(user))
+							.catch(err =>
+								res.status(400).json({
+									error:
+										'Unable to save comment to user record.',
+								})
+							);
+					}
 				}
-			}
-		});
+			})
+			.catch(err => res.status(404).json({ error: 'Cannot find user' }));
 	}
 );
 
@@ -360,8 +381,13 @@ router.delete(
 
 					user.comments.splice(removeIndex, 1);
 					user.save()
-						.then(user => res.json(user))
-						.catch(err => res.json(err));
+						.then(user => res.status(200).json(user))
+						.catch(err =>
+							res.status(400).json({
+								error:
+									'Unable to remove comment from user record.',
+							})
+						);
 				} else {
 					errors.nocomment = 'No comment with this id to remove';
 					res.status(404).json(errors);
@@ -391,12 +417,16 @@ router.post(
 					user.likes.some(({ likeid }) => likeid === req.body.likeid)
 				) {
 					errors.alreadyliked = 'User has already liked this';
-					res.status(404).json(errors);
+					res.status(400).json(errors);
 				} else {
 					user.likes.unshift(like);
 					user.save()
-						.then(user => res.json(user))
-						.catch(err => res.json(err));
+						.then(user => res.status(201).json(user))
+						.catch(err =>
+							res.status(400).json({
+								error: 'Unable to add like to user record.',
+							})
+						);
 				}
 			}
 		});
@@ -430,11 +460,16 @@ router.delete(
 
 					user.likes.splice(removeIndex, 1);
 					user.save()
-						.then(user => res.json(user))
-						.catch(err => res.json(err));
+						.then(user => res.status(200).json(user))
+						.catch(err =>
+							res.status(400).json({
+								error:
+									'Unable to remove like from user record.',
+							})
+						);
 				} else {
 					errors.like = 'Already unliked';
-					res.status(404).json(errors);
+					res.status(400).json(errors);
 				}
 			}
 		});
@@ -478,13 +513,23 @@ router.post(
 					user.clubs.splice(removeIndex, 1);
 					user.clubs.push(club);
 					user.save()
-						.then(user => res.json(user))
-						.catch(err => res.json(err));
+						.then(user => res.status(201).json(user))
+						.catch(err =>
+							res.status(400).json({
+								error:
+									'Unable to edit club information to user record.',
+							})
+						);
 				} else {
 					user.clubs.push(club);
 					user.save()
-						.then(user => res.json(user))
-						.catch(err => res.json(err));
+						.then(user => res.status(201).json(user))
+						.catch(err =>
+							res.status(400).json({
+								error:
+									'Unable to add club information to user record.',
+							})
+						);
 				}
 			}
 		});
@@ -516,11 +561,16 @@ router.delete(
 
 					user.clubs.splice(removeIndex, 1);
 					user.save()
-						.then(user => res.json(user))
-						.catch(err => res.json(err));
+						.then(user => res.status(200).json(user))
+						.catch(err =>
+							res.status(400).json({
+								error:
+									'Unable to remove club from user record.',
+							})
+						);
 				} else {
 					errors.club = 'Not a member of this club';
-					res.status(404).json(errors);
+					res.status(400).json(errors);
 				}
 			}
 		});

@@ -27,9 +27,9 @@ router.get(
 	(req, res) => {
 		User.countDocuments((err, count) => {
 			if (err) {
-				res.json(err);
+				res.status(400).json(err);
 			} else {
-				res.json(count);
+				res.status(200).json(count);
 			}
 		});
 	}
@@ -45,9 +45,9 @@ router.get(
 	(req, res) => {
 		Post.estimatedDocumentCount((err, count) => {
 			if (err) {
-				res.json(err);
+				res.status(400).json(err);
 			} else {
-				res.json(count);
+				res.status(200).json(count);
 			}
 		});
 	}
@@ -62,56 +62,60 @@ router.get(
 	requireRole('admin'),
 	(req, res) => {
 		recursive('./uploads', (err, files) => {
-			if (err) res.json(err);
+			if (err) res.status(400).json(err);
 			if (files) {
 				const numFiles = files.length;
-				res.json(numFiles);
+				res.status(200).json(numFiles);
 			}
 		});
 	}
 );
 
-// @route   GET /admin/users
+// @route   GET /admin/users/search?handle
 // @desc    Find users by handle
 // @access  Admin
 router.get(
-	'/users',
+	'/users/search',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('admin'),
 	(req, res) => {
-		User.find({ handle: { $regex: req.body.handle } })
+		User.find({ handle: { $regex: req.query.handle, $options: 'i' } })
 			.then(user => {
-				res.json(user);
+				res.status(200).json(user);
 			})
-			.catch(err => res.json(err));
+			.catch(err => res.status(404).json({ Error: 'No users found.' }));
 	}
 );
 
-// @route   GET /admin/user
+// @route   GET /admin/user/:id
 // @desc    Find user
 // @access  Admin
 router.get(
-	'/user',
+	'/user/:id',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('admin'),
 	(req, res) => {
-		User.findById(req.body.id)
+		User.findById(req.params.id)
 			.then(user => {
-				res.json(user);
+				res.status(200).json(user);
 			})
-			.catch(err => res.json(err));
+			.catch(err =>
+				res
+					.status(404)
+					.json({ Error: 'No user found with this handle.' })
+			);
 	}
 );
 
-// @route   POST /admin/user
+// @route   POST /admin/user/:id
 // @desc    Find user and edit
 // @access  Admin
 router.post(
-	'/user',
+	'/user/:id',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('admin'),
 	(req, res) => {
-		User.findById(req.body.id)
+		User.findById(req.params.id)
 			.then(user => {
 				const accountSettings = {};
 				if (req.body.name) accountSettings.name = req.body.name;
@@ -213,10 +217,20 @@ router.post(
 					{ $set: accountSettings },
 					{ new: true }
 				)
-					.then(user => res.json(user))
-					.catch(err => res.json(err));
+					.then(user => res.status(201).json(user))
+					.catch(err =>
+						res
+							.status(400)
+							.json({
+								error: 'Unable to update user information.',
+							})
+					);
 			})
-			.catch(err => res.json(err));
+			.catch(err =>
+				res
+					.status(404)
+					.json({ error: 'Unable to find a user with this id' })
+			);
 	}
 );
 
@@ -233,15 +247,24 @@ router.delete(
 				user.posts.forEach(post => {
 					Post.findByIdAndDelete(post.id)
 						.then()
-						.catch(err => res.json(err));
+						.catch(err =>
+							res
+								.status(400)
+								.json({
+									Error:
+										'Unable to delete posts from this user.',
+								})
+						);
 				});
 			}
 			// TODO - delete user uploads
 			user.remove((err, user) => {
 				if (err) {
-					res.json(err);
+					res.status(400).json({
+						error: 'Unable to delete user record.',
+					});
 				}
-				res.json(user);
+				res.status(200).json(user);
 			});
 		});
 	}

@@ -10,7 +10,7 @@ const Profile = require('../../models/Post');
 // @route   GET post/test
 // @desc    Test post route
 // @access  Public
-router.get('/test', (req, res) => res.json({ success: true }));
+router.get('/test', (req, res) => res.status(200).json({ success: true }));
 
 mongoose.connection.on('connected', () => {
 	// File upload middleware

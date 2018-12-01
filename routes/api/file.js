@@ -20,7 +20,7 @@ router.post(
 		const errors = {};
 
 		if (!req.files) {
-			res.status(400).json({ error: 'No files found' });
+			res.status(404).json({ error: 'No files found' });
 		} else {
 			const uploads = [];
 
@@ -37,9 +37,9 @@ router.post(
 				upload
 					.save()
 					.then(uploads.push(upload))
-					.catch(err => res.json(err));
+					.catch(err => res.status(400).json(err));
 			});
-			res.json(uploads);
+			res.status(202).json(uploads);
 		}
 	}
 );
@@ -54,7 +54,7 @@ router.get('/uploads/:id', (req, res) => {
 			if (!upload) {
 				res.status(404).json({ error: 'No upload found' });
 			}
-			res.json(upload);
+			res.status(200).json(upload);
 		})
 		.catch(err => res.status(404).json(err));
 });
@@ -97,9 +97,9 @@ router.delete(
 								} else {
 									fs.unlink(upload.path, err => {
 										if (err) {
-											res.status(404).json(err);
+											res.status(400).json(err);
 										} else {
-											res.json({
+											res.status(200).json({
 												stage1: upload,
 												stage2:
 													'File successfully deleted',
