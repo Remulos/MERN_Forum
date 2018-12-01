@@ -20,6 +20,18 @@ const admin = require('./routes/api/admin');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// Passport middleware
+app.use(passport.initialize());
+
+// Passport Config
+require('./config/passport')(passport);
+
+// Setup routes
+app.use('/user', user);
+app.use('/post', post);
+app.use('/file', file);
+app.use('/admin', admin);
+
 const uri = require('./config/keys').mongoURI;
 
 // Connect to MongoDB
@@ -39,7 +51,7 @@ db.on('connecting', () =>
 );
 
 db.on('connected', () =>
-	console.log(`Mongoose default connection is open to ${uri} on port ${port}`)
+	console.log(`Mongoose default connection is open to ${uri}`)
 );
 
 db.on('error', err =>

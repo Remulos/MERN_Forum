@@ -111,7 +111,7 @@ router.post('/login', (req, res) => {
 });
 
 // @route   GET /user
-// @desc    Get user account settings
+// @desc    Get current user account settings
 // @access  Private
 router.get(
 	'/',
@@ -168,8 +168,39 @@ router.get(
 	}
 );
 
+// @route   GET /user/:handle
+// @desc    View user profile
+// @access  Public
+router.get('/:handle', (req, res) => {
+	User.findOne({ handle: req.params.handle })
+		.then(user => {
+			const foundUser = {};
+
+			foundUser.handle = user.handle;
+			foundUser.date = user.date;
+			foundUser.dob = user.dob;
+			foundUser.avatar = user.avatar;
+			foundUser.coverphoto = user.coverphoto;
+			foundUser.reputation = user.reputation;
+			foundUser.interests = user.interests;
+			foundUser.about = user.about;
+			foundUser.rank = user.rank;
+			foundUser.gender = user.gender;
+			foundUser.location = user.location;
+			foundUser.clubs = user.clubs;
+			foundUser.contentCount = user.contentCount;
+			foundUser.posts = user.posts;
+			foundUser.comments = user.comments;
+			foundUser.ships = user.ships;
+			foundUser.uploads = user.uploads;
+
+			res.json(foundUser);
+		})
+		.catch(err => res.status(404).json(err));
+});
+
 // @route   POST /user/edit
-// @desc    Edit user model values
+// @desc    Edit current user model values
 // @access  Private
 router.post(
 	'/edit',
@@ -272,7 +303,7 @@ router.post(
 );
 
 // @route   POST /user/comment
-// @desc    Add record of comment to user profile
+// @desc    Add record of comment to current user profile
 // @access  Private
 router.post(
 	'/comment',
@@ -305,7 +336,7 @@ router.post(
 );
 
 // @route   DELETE /user/comment
-// @desc    Delete record of comment
+// @desc    Delete record of comment from current user
 // @access  Private
 router.delete(
 	'/comment',
@@ -341,7 +372,7 @@ router.delete(
 );
 
 // @route   POST /user/like
-// @desc    Add record of likes to user profile
+// @desc    Add record of likes to current user profile
 // @access  Private
 router.post(
 	'/like',
@@ -373,7 +404,7 @@ router.post(
 );
 
 // @route   DELETE /user/like
-// @desc    Remove record of like
+// @desc    Remove record of like from current user
 // @access  Private
 router.delete(
 	'/like',
@@ -411,7 +442,7 @@ router.delete(
 );
 
 // @route   POST /user/club
-// @desc    Add / Edit record of club membership to user
+// @desc    Add / Edit record of club membership to current user
 // @access  Private
 router.post(
 	'/club',
@@ -461,7 +492,7 @@ router.post(
 );
 
 // @route   DELETE /user/club
-// @desc    Delete record of club membership from user
+// @desc    Delete record of club membership from current user
 // @access  Private
 router.delete(
 	'/club',
@@ -498,12 +529,12 @@ router.delete(
 
 // TODO
 // @route   POST /user/post
-// @desc    Add record of post to user
+// @desc    Add record of post to current user
 // @access  Private
 
 // TODO
 // @route   DELETE /user/post
-// @desc    Delete record of post to user
+// @desc    Delete record of post to current user
 // @access  Private
 
 module.exports = router;
