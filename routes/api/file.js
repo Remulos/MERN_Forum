@@ -2,12 +2,18 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const fs = require('fs');
-const multer = require('multer');
 
+// Load models
 const User = require('../../models/User');
 const Upload = require('../../models/Upload');
 
+// Load multer storage method
 const generateUpload = require('../../src/modules/uploadDestination');
+
+// @route   GET /file/test
+// @desc    Test route
+// @access  Public
+router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 
 // @route   POST /file
 // @desc    Upload array of files from input field 'file' - without adding to profile
@@ -47,6 +53,7 @@ router.post(
 // @route   GET /file/uploads/:id
 // @desc    Get file from id
 // @access  Public
+// TODO  		Link to filesystem
 router.get('/uploads/:id', (req, res) => {
 	Upload.findOne({ _id: req.params.id })
 		.populate('user', ['handle', 'avatar'])
@@ -60,7 +67,7 @@ router.get('/uploads/:id', (req, res) => {
 });
 
 // @route   DELETE /file
-// @desc    Upload array of file names to delete
+// @desc    Delete upload through id
 // @access  Private
 router.delete(
 	'/',
@@ -118,6 +125,26 @@ router.delete(
 				}
 			});
 		}
+	}
+);
+
+// @route   GET /file/uploads/user/:id
+// @desc    Get all files uploaded by user
+// @access  Public
+// TODO  		Link to filesystem
+router.get(
+	'/uploads/user/:id',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		Upload.find({ user: req.params.id }, (err, uploads) => {
+			if (err) {
+				res.status(404).json({
+					Error: 'Unable to find any files with this user id.',
+				});
+			} else {
+				res.status(200).json(uploads);
+			}
+		});
 	}
 );
 

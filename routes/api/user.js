@@ -136,6 +136,7 @@ router.get(
 // @route   GET /user/find?handle
 // @desc    Find users by handle
 // @access  Private
+// TODO - add search limit
 router.get(
 	'/find',
 	// Uncomment this to make user profile private
