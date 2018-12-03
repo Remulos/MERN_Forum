@@ -29,33 +29,9 @@ const UploadSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'user',
 	},
-	comments: [
-		{
-			user: {
-				type: Schema.Types.ObjectId,
-				ref: 'user',
-			},
-			date: {
-				type: Date,
-				default: Date.now,
-			},
-			text: {
-				type: String,
-				required: true,
-			},
-		},
-	],
-	likes: [
-		{
-			user: {
-				type: Schema.Types.ObjectId,
-				ref: 'user',
-			},
-		},
-	],
 	viewCount: {
 		type: Number,
 	},
 });
 
-module.exports = Upload = mongoose.model('uploads', UploadSchema);
+module.exports = Upload = mongoose.model('upload', UploadSchema);

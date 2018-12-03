@@ -141,12 +141,12 @@ const UserSchema = new Schema({
 		},
 	},
 	avatar: {
-		type: String,
-		default: '',
+		type: Schema.Types.ObjectId,
+		ref: 'upload',
 	},
 	coverphoto: {
-		type: String,
-		default: '',
+		type: Schema.Types.ObjectId,
+		ref: 'upload',
 	},
 	reputation: {
 		type: Number,
@@ -157,11 +157,11 @@ const UserSchema = new Schema({
 		type: Number,
 		default: 0,
 	},
-	followers: [
+	following: [
 		{
 			user: {
-				type: String,
-				required: true,
+				type: Schema.Types.ObjectId,
+				ref: 'user',
 			},
 		},
 	],
@@ -175,30 +175,6 @@ const UserSchema = new Schema({
 	location: {
 		type: String,
 	},
-	clubs: [
-		{
-			clubid: {
-				type: String,
-				required: true,
-			},
-			name: {
-				type: String,
-				required: true,
-			},
-			role: {
-				type: String,
-				required: true,
-			},
-			permissions: {
-				type: Number,
-				default: 0,
-			},
-			follow: {
-				type: Boolean,
-				default: true,
-			},
-		},
-	],
 	date: {
 		type: Date,
 		default: Date.now,
@@ -211,30 +187,6 @@ const UserSchema = new Schema({
 		type: Boolean,
 		default: true,
 	},
-	posts: [
-		{
-			postid: {
-				type: String,
-				required: true,
-			},
-			follow: {
-				type: Boolean,
-				default: true,
-			},
-		},
-	],
-	comments: [
-		{
-			commentid: {
-				type: String,
-				required: true,
-			},
-			follow: {
-				type: Boolean,
-				default: true,
-			},
-		},
-	],
 	likes: [
 		{
 			likeid: {
@@ -255,14 +207,6 @@ const UserSchema = new Schema({
 			number: {
 				type: Number,
 				default: 1,
-			},
-		},
-	],
-	uploads: [
-		{
-			uploadPath: {
-				type: String,
-				required: true,
 			},
 		},
 	],

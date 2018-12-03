@@ -7,16 +7,7 @@ const recursive = require('recursive-readdir');
 const User = require('../../models/User');
 const Post = require('../../models/Post');
 
-// Permissions validator for Admin routes
-const requireRole = role => {
-	return (req, res, next) => {
-		if (req.user.role === role) {
-			next();
-		} else {
-			res.status(403).json('Insufficient permissions to access route.');
-		}
-	};
-};
+const requireRole = require('../../src/modules/requireRole');
 
 // @route   GET /admin/users
 // @desc    Get total number of users
@@ -24,7 +15,7 @@ const requireRole = role => {
 router.get(
 	'/total-users',
 	passport.authenticate('jwt', { session: false }),
-	requireRole('admin'),
+	requireRole('Admin'),
 	(req, res) => {
 		User.countDocuments((err, count) => {
 			if (err) {
@@ -36,13 +27,13 @@ router.get(
 	}
 );
 
-// @route   GET /admin/posts
+// @route   GET /A/posts
 // @desc    Get total number of posts in database
 // @access  Admin
 router.get(
 	'/total-posts',
 	passport.authenticate('jwt', { session: false }),
-	requireRole('admin'),
+	requireRole('Admin'),
 	(req, res) => {
 		Post.estimatedDocumentCount((err, count) => {
 			if (err) {
@@ -60,7 +51,7 @@ router.get(
 router.get(
 	'/total-uploads',
 	passport.authenticate('jwt', { session: false }),
-	requireRole('admin'),
+	requireRole('Admin'),
 	(req, res) => {
 		recursive('./uploads', (err, files) => {
 			if (err) res.status(400).json(err);
@@ -78,7 +69,7 @@ router.get(
 router.get(
 	'/users/search',
 	passport.authenticate('jwt', { session: false }),
-	requireRole('admin'),
+	requireRole('Admin'),
 	(req, res) => {
 		// Search entire 'users' collection by handle for the regular expression of the search query
 		User.find({ handle: { $regex: req.query.handle, $options: 'i' } })
@@ -95,7 +86,7 @@ router.get(
 router.get(
 	'/user/:id',
 	passport.authenticate('jwt', { session: false }),
-	requireRole('admin'),
+	requireRole('Admin'),
 	(req, res) => {
 		User.findById(req.params.id)
 			.then(user => {
@@ -115,7 +106,7 @@ router.get(
 router.post(
 	'/user/:id',
 	passport.authenticate('jwt', { session: false }),
-	requireRole('admin'),
+	requireRole('Admin'),
 	(req, res) => {
 		User.findById(req.params.id)
 			.then(user => {
@@ -242,7 +233,7 @@ router.post(
 router.delete(
 	'/user',
 	passport.authenticate('jwt', { session: false }),
-	requireRole('admin'),
+	requireRole('Admin'),
 	(req, res) => {
 		User.findById(req.body.id).then(user => {
 			// TODO - Find and delete all user posts?

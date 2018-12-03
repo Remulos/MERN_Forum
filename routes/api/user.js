@@ -7,6 +7,11 @@ const passport = require('passport');
 // Load User model to use in mongoose
 const User = require('../../models/User');
 
+const fileUpload = require('../../src/modules/fileUpload');
+const setupUser = require('../../src/modules/setupUser');
+const encryptPassword = require('../../src/modules/encryptPassword');
+const ifFile = require('../../src/modules/ifFile');
+
 // @route   GET /user/test
 // @desc    Test route
 // @access  Public
@@ -15,53 +20,86 @@ router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 // @route   POST /user/register
 // @desc    Register new user
 // @access  Public
-router.post('/register', (req, res) => {
-	const errors = {};
+router.post(
+	'/register',
+	fileUpload.fields([
+		{ name: 'avatar', maxCount: 1 },
+		{ name: 'coverphoto', maxCount: 1 },
+	]),
+	(req, res) => {
+		const errors = {};
 
-	// Search existing users by email to see if account already exists.
-	User.findOne({ email: req.body.email }).then(user => {
-		// If that account already exists, return an error message.
-		if (user) {
-			errors.email = 'An account with this email already exists';
-			res.status(400).json(errors);
-		} else {
-			// Search existing users by handle to see if the requested handle is already taken.
-			User.findOne({ handle: req.body.handle }).then(user => {
-				// If a user doesn't already exist, populate a new object with request field data.
-				if (user) {
-					errors.handle = 'This handle is not available';
-					res.status(400).json(errors);
-				}
-				// If handle isn't taken, create new User document and save it to the 'users' collection.
-				const newUser = new User({
-					name: req.body.name,
-					handle: req.body.handle,
-					email: req.body.email,
-					password: req.body.password,
-					date: req.body.date,
-					dob: req.body.dob,
-					timezone: req.body.timezone,
+		// Search existing users by email to see if account already exists.
+		User.findOne({ email: req.body.email }).then(user => {
+			// If that account already exists, return an error message.
+			if (user) {
+				errors.email = 'An account with this email already exists';
+				res.status(400).json(errors);
+			} else {
+				// Search existing users by handle to see if the requested handle is already taken.
+				User.findOne({ handle: req.body.handle }).then(user => {
+					// If a user doesn't already exist, populate a new object with request field data.
+					if (user) {
+						errors.handle = 'This handle is not available';
+						res.status(400).json(errors);
+					}
+
+					const register = async () => {
+						let newUser;
+						let coverphoto;
+						let avatar;
+
+						if (req.files) {
+							const userInfo = {
+								name: req.body.name,
+								handle: req.body.handle,
+								email: req.body.email,
+								password: req.body.password,
+								date: req.body.date,
+								dob: req.body.dob,
+								timezone: req.body.timezone,
+								role: 'Civilian',
+							};
+
+							if (req.files['avatar'][0]) {
+								avatar = await ifFile(req, 'avatar');
+								userInfo.avatar = avatar;
+							}
+
+							if (req.files['coverphoto'][0]) {
+								coverphoto = await ifFile(req, 'coverphoto');
+								userInfo.coverphoto = coverphoto;
+							}
+							const createNewUser = async () => {
+								newUser = new User(userInfo);
+								await encryptPassword(newUser);
+								return newUser;
+							};
+
+							const user = await createNewUser();
+							await Upload.findByIdAndUpdate(avatar.id, {
+								$set: { user: user },
+							});
+							await Upload.findByIdAndUpdate(coverphoto.id, {
+								$set: { user: user },
+							});
+							return user;
+						} else {
+							const user = new User(userInfo);
+							await encryptPassword(user);
+							return user;
+						}
+					};
+					register()
+						.then(user => {
+							res.status(201).json(user);
+						})
+						.catch(err => res.status(400).json(err));
 				});
-
-				// First generate the salt with a callback function.
-				bcrypt.genSalt(10, (err, salt) => {
-					// Inside the call back function hash the new users password.
-					bcrypt.hash(newUser.password, salt, (err, hash) => {
-						if (err) throw err;
-						// Change the new users password to the new hash string.
-						newUser.password = hash;
-
-						// Save the whole new user object to MongoDB and return it as json.
-						newUser
-							.save()
-							.then(user => res.status(201).json(user))
-							.catch(err => console.log(err));
-					});
-				});
-			});
-		}
-	});
-});
+			}
+		});
+	}
+);
 
 // @route   POST /user/login
 // @desc    Log in existing user
@@ -120,6 +158,9 @@ router.get(
 	(req, res) => {
 		// Search for the user document with id matching id returned from the passport strategy.
 		User.findById(req.user.id)
+			.populate('avatar', ['path', 'filename'])
+			.populate('coverphoto', ['path', 'filename'])
+			.populate('following', ['handle', 'avatar'])
 			.then(user => {
 				if (!user) {
 					errors.nouser = 'Account settings not found.';
@@ -127,11 +168,7 @@ router.get(
 				}
 				res.status(200).json({ user });
 			})
-			.catch(err =>
-				res.status(401).json({
-					error: 'Invalid token. Please sign in to view profile.',
-				})
-			);
+			.catch(err => res.status(401).json(err));
 	}
 );
 

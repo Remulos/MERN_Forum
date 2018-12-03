@@ -9,7 +9,7 @@ const Post = require('../../models/Post');
 const Profile = require('../../models/Post');
 
 // Load multer storage method
-const fileUploader = require('../../src/modules/uploadDestination');
+const fileUpload = require('../../src/modules/fileUpload');
 const addFiles = require('../../src/modules/test');
 
 // @route   GET post/test
@@ -23,7 +23,7 @@ router.get('/test', (req, res) => res.status(200).json({ success: true }));
 router.post(
 	'/',
 	passport.authenticate('jwt', { session: false }),
-	fileUploader.array('file'),
+	fileUpload.array('file'),
 	(req, res) => {
 		const newPost = new Post({
 			user: req.user.id,
@@ -49,13 +49,10 @@ router.post(
 					originalname: file.originalname,
 					user: req.user.id,
 				});
-				const newFile = {};
-				newFile.link = file.path;
-				newFile.name = file.originalname;
 
 				upload
 					.save()
-					.then(newPost.attachments.push(newFile))
+					.then(newPost.attachments.push(upload))
 					.catch(err => res.status(400).json(err));
 			});
 			newPost

@@ -7,7 +7,7 @@ const fs = require('fs');
 const Upload = require('../../models/Upload');
 
 // Load multer storage middleware method
-const generateUpload = require('../../src/modules/uploadDestination');
+const fileUpload = require('../../src/modules/fileUpload');
 
 // @route   GET /file/test
 // @desc    Test route
@@ -20,7 +20,7 @@ router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 router.post(
 	'/',
 	passport.authenticate('jwt', { session: false }),
-	generateUpload.array('file'),
+	fileUpload.array('file'),
 	(req, res) => {
 		if (!req.files) {
 			res.status(404).json({ error: 'No files found' });

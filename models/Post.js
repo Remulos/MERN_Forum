@@ -14,25 +14,11 @@ const PostSchema = new Schema({
 		type: String,
 		required: true,
 	},
-	images: [
-		{
-			link: {
-				type: String,
-				required: true,
-			},
-			name: {
-				type: String,
-			},
-		},
-	],
 	attachments: [
 		{
-			link: {
-				type: String,
-				required: true,
-			},
-			name: {
-				type: String,
+			upload: {
+				type: Schema.Types.ObjectId,
+				ref: 'upload',
 			},
 		},
 	],
@@ -54,33 +40,27 @@ const PostSchema = new Schema({
 	],
 	comments: [
 		{
-			user: {
+			comment: {
 				type: Schema.Types.ObjectId,
-				ref: 'user',
+				ref: 'comment',
 			},
-			date: {
-				type: Date,
-				default: Date.now,
-			},
-			text: {
-				type: String,
-			},
-			images: [
-				{
-					uploadid: {
-						type: String,
-						required: true,
-					},
-					name: {
-						type: String,
-					},
-				},
-			],
 		},
 	],
 	category: {
 		type: String,
 		required: true,
+	},
+	pinned: {
+		type: Boolean,
+		default: false,
+	},
+	starred: {
+		type: Boolean,
+		default: false,
+	},
+	locked: {
+		type: Boolean,
+		default: false,
 	},
 });
 
