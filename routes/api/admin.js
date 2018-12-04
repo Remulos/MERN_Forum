@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const recursive = require('recursive-readdir');
+const fs = require('fs');
 
 // Load models
 const User = require('../../models/User');
@@ -329,6 +330,48 @@ router.post(
 	}
 );
 
+// @route   DELETE /admin/upload/remove?upload
+// @desc    Find user upload and delete it.
+// @access  Admin
+router.delete(
+	'/upload/remove',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		// Make sure an upload document exists with the provided id.
+		Upload.findByIdAndRemove(req.body.id, (err, upload) => {
+			if (err) res.status(404).json(err);
+			else {
+				// Find any user who is using this upload as an avatar or cover photo.
+				User.findOne(
+					{
+						$or: [
+							{ avatar: upload._id },
+							{ coverphoto: upload._id },
+						],
+					},
+					(err, user) => {
+						if (err) res.status(404).json(err);
+						if (user.avatar.toString() === upload._id.toString()) {
+							user.avatar = undefined;
+						} else if (
+							user.coverphoto.toString() === upload._id.toString()
+						) {
+							user.coverphoto = undefined;
+						}
+						user.save()
+							.then(user => res.json(user))
+							.catch(err => res.json(err));
+					}
+				);
+				fs.unlink(upload.path, err => {
+					if (err) res.json(err);
+				});
+			}
+		});
+	}
+);
+
 // @route   DELETE /admin/user
 // @desc    Find user and delete
 // @access  Admin
@@ -338,8 +381,8 @@ router.delete(
 	requireRole('Admin'),
 	(req, res) => {
 		User.findById(req.body.id).then(user => {
-			// TODO - Find and delete all user uploads
 			// TODO - Find and remove all user likes
+			// TODO - Delete or archive user document
 		});
 	}
 );
