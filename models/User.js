@@ -159,10 +159,8 @@ const UserSchema = new Schema({
 	},
 	following: [
 		{
-			user: {
-				type: Schema.Types.ObjectId,
-				ref: 'user',
-			},
+			type: Schema.Types.ObjectId,
+			ref: 'user',
 		},
 	],
 	rank: {
@@ -187,29 +185,6 @@ const UserSchema = new Schema({
 		type: Boolean,
 		default: true,
 	},
-	likes: [
-		{
-			likeid: {
-				type: String,
-				required: true,
-			},
-			follow: {
-				type: Boolean,
-				default: true,
-			},
-		},
-	],
-	ships: [
-		{
-			name: {
-				type: String,
-			},
-			number: {
-				type: Number,
-				default: 1,
-			},
-		},
-	],
 });
 
 module.exports = User = mongoose.model('user', UserSchema);

@@ -6,11 +6,10 @@ const multer = require('multer');
 
 // Load models
 const Post = require('../../models/Post');
-const Profile = require('../../models/Post');
 
 // Load multer storage method
 const fileUpload = require('../../src/modules/fileUpload');
-const addFiles = require('../../src/modules/test');
+const isEmpty = require('../../src/modules/is-empty');
 
 // @route   GET post/test
 // @desc    Test post route
@@ -32,7 +31,7 @@ router.post(
 			category: req.body.category,
 		});
 
-		if (!req.files) {
+		if (isEmpty(req.files)) {
 			console.log('files not present');
 			newPost
 				.save()

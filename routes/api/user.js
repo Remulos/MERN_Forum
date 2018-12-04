@@ -3,14 +3,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const keys = require('../../config/keys');
 const passport = require('passport');
+const fs = require('fs');
 
 // Load User model to use in mongoose
 const User = require('../../models/User');
 
 const fileUpload = require('../../src/modules/fileUpload');
-const setupUser = require('../../src/modules/setupUser');
 const encryptPassword = require('../../src/modules/encryptPassword');
 const ifFile = require('../../src/modules/ifFile');
+const isEmpty = require('../../src/modules/is-empty');
 
 // @route   GET /user/test
 // @desc    Test route
@@ -20,6 +21,7 @@ router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 // @route   POST /user/register
 // @desc    Register new user
 // @access  Public
+// @ TODO	-	Test without upload
 router.post(
 	'/register',
 	fileUpload.fields([
@@ -38,51 +40,83 @@ router.post(
 			} else {
 				// Search existing users by handle to see if the requested handle is already taken.
 				User.findOne({ handle: req.body.handle }).then(user => {
-					// If a user doesn't already exist, populate a new object with request field data.
+					// If a user doesn't already exist, create a new object with request field data.
 					if (user) {
 						errors.handle = 'This handle is not available';
 						res.status(400).json(errors);
 					}
-
+					// Async function so that newUser document will only populate the avatar and coverphoto fields with their document id's once they have been created.
 					const register = async () => {
-						let newUser;
-						let coverphoto;
-						let avatar;
+						//let coverphoto;
+						//let avatar;
 
-						if (req.files) {
-							const userInfo = {
-								name: req.body.name,
-								handle: req.body.handle,
-								email: req.body.email,
-								password: req.body.password,
-								date: req.body.date,
-								dob: req.body.dob,
-								timezone: req.body.timezone,
-								role: 'Civilian',
-							};
+						// New userInfo object to store all non-upload variables.
+						const userInfo = {
+							name: req.body.name,
+							handle: req.body.handle,
+							email: req.body.email,
+							password: req.body.password,
+							date: req.body.date,
+							dob: req.body.dob,
+							timezone: req.body.timezone,
+							role: 'Civilian',
+						};
 
-							if (req.files['avatar'][0]) {
+						// Check to see if any files were uploaded.
+						// Using isEmpty because even without uploads, req.files returns an empty object.
+						if (!isEmpty(req.files)) {
+							let avatar;
+							let coverphoto;
+
+							// Checking if an avatar file was uploaded and creating document for it using ifFile().
+							// Then adding new document to userInfo object (which will be used to create new User document).
+							if (!isEmpty(req.files['avatar'])) {
 								avatar = await ifFile(req, 'avatar');
 								userInfo.avatar = avatar;
 							}
 
-							if (req.files['coverphoto'][0]) {
+							// Checking if an avatar file was uploaded and creating document for it using ifFile().
+							// Then adding new document to userInfo object (which will be used to create new User document).
+							if (!isEmpty(req.files['coverphoto'])) {
 								coverphoto = await ifFile(req, 'coverphoto');
 								userInfo.coverphoto = coverphoto;
 							}
+
+							// Creating async function for new User document generation to ensure the password is encrypted by encryptPassword() before being returned.
 							const createNewUser = async () => {
-								newUser = new User(userInfo);
+								const newUser = new User(userInfo);
 								await encryptPassword(newUser);
 								return newUser;
 							};
 
+							// Assign the new User document returned by the createNewUser() function to a new user vairable to use to update avatar/coverphoto updates.
 							const user = await createNewUser();
-							await Upload.findByIdAndUpdate(avatar.id, {
-								$set: { user: user },
-							});
-							await Upload.findByIdAndUpdate(coverphoto.id, {
-								$set: { user: user },
-							});
+
+							// Update newly created upload file to include newly created user reference.
+							if (!isEmpty(req.files['avatar'])) {
+								Upload.findByIdAndUpdate(
+									avatar._id,
+									{
+										$set: { user: user },
+									},
+									{ new: true }
+								)
+									.then()
+									.catch(err => console.log(err));
+							}
+							// Update newly created upload file to include newly created user reference.
+							if (!isEmpty(req.files['coverphoto'])) {
+								Upload.findByIdAndUpdate(
+									coverphoto.id,
+									{
+										$set: { user: user },
+									},
+									{ new: true }
+								)
+									.then()
+									.catch(err => console.log(err));
+							}
+
 							return user;
 						} else {
 							const user = new User(userInfo);
@@ -178,41 +212,29 @@ router.get(
 // TODO - add search limit
 router.get(
 	'/find',
-	// Uncomment this to make user profile private
+	// Uncomment this to make searching user profiles private
 	//passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		console.log(req.query.handle);
 		// Find all users with handles matching the regular expression of the request query parameters.
 		User.find({ handle: { $regex: req.query.handle, $options: 'i' } })
+			.populate('avatar', ['path', 'filename'])
 			.then(user => {
-				// Create an array for the restricted user documents.
-				const users = [];
-				// Cycle through eact returned user and add data to the foundUser object that is suitable for public viewing (no email addresses, etc.).
-				user.forEach(user => {
-					const foundUser = {};
+				const getSearchData = async () => {
+					// Create an array for the restricted user documents.
+					const users = [];
+					// Cycle through eact returned user and add data to the foundUser object that is suitable for public viewing (no email addresses, etc.).
+					await user.forEach(user => {
+						const foundUser = {};
+						foundUser.id = user.id;
+						foundUser.handle = user.handle;
+						foundUser.avatar = user.avatar;
+						// Add restricted user object to users array
+						users.push(foundUser);
+					});
 
-					foundUser.handle = user.handle;
-					foundUser.date = user.date;
-					foundUser.dob = user.dob;
-					foundUser.avatar = user.avatar;
-					foundUser.coverphoto = user.coverphoto;
-					foundUser.reputation = user.reputation;
-					foundUser.interests = user.interests;
-					foundUser.about = user.about;
-					foundUser.rank = user.rank;
-					foundUser.gender = user.gender;
-					foundUser.location = user.location;
-					foundUser.clubs = user.clubs;
-					foundUser.contentCount = user.contentCount;
-					foundUser.posts = user.posts;
-					foundUser.comments = user.comments;
-					foundUser.ships = user.ships;
-					foundUser.uploads = user.uploads;
-
-					// Add restricted user object to users array
-					users.push(foundUser);
-				});
-				res.status(200).json(users);
+					res.status(200).json(users);
+				};
+				getSearchData();
 			})
 			.catch(err =>
 				res.status(404).json({
@@ -227,10 +249,13 @@ router.get(
 // @access  Public
 router.get('/profile/:handle', (req, res) => {
 	User.findOne({ handle: req.params.handle })
+		.populate('avatar', ['path', 'filename'])
+		.populate('coverphoto', ['path', 'filename'])
+		.populate('following', ['handle', 'avatar'])
 		.then(user => {
 			// Create an object to store user data to exclude data that shouldn't be available publicly.
 			const foundUser = {};
-
+			foundUser.id = user.id;
 			foundUser.handle = user.handle;
 			foundUser.date = user.date;
 			foundUser.dob = user.dob;
@@ -242,12 +267,7 @@ router.get('/profile/:handle', (req, res) => {
 			foundUser.rank = user.rank;
 			foundUser.gender = user.gender;
 			foundUser.location = user.location;
-			foundUser.clubs = user.clubs;
 			foundUser.contentCount = user.contentCount;
-			foundUser.posts = user.posts;
-			foundUser.comments = user.comments;
-			foundUser.ships = user.ships;
-			foundUser.uploads = user.uploads;
 
 			res.status(200).json(foundUser);
 		})
@@ -262,6 +282,10 @@ router.get('/profile/:handle', (req, res) => {
 router.post(
 	'/edit',
 	passport.authenticate('jwt', { session: false }),
+	fileUpload.fields([
+		{ name: 'avatar', maxCount: 1 },
+		{ name: 'coverphoto', maxCount: 1 },
+	]),
 	(req, res) => {
 		// Create object for updated user settings and only add settings if specified in request body.
 		const accountSettings = {};
@@ -339,10 +363,6 @@ router.post(
 		if (req.body.eventreminders)
 			accountSettings.preferences.eventreminders =
 				req.body.eventreminders;
-
-		if (req.body.avatar) accountSettings.avatar = req.body.avatar;
-		if (req.body.coverphoto)
-			accountSettings.coverphoto = req.body.coverphoto;
 		if (req.body.gender) accountSettings.gender = req.body.gender;
 		if (req.body.location) accountSettings.location = req.body.location;
 
@@ -351,288 +371,128 @@ router.post(
 			accountSettings.interests = req.body.interests.split(',');
 		}
 
-		// Use the user id returned from the passport strategy and use it to find and update the user document using the accountSettings object.
-		User.findByIdAndUpdate(
-			req.user.id,
-			{ $set: accountSettings },
-			{ new: true }
-		)
-			.then(user => res.status(200).json(user))
-			.catch(err =>
-				res.status(404).json({ error: 'Unable top find user account.' })
-			);
-	}
-);
+		// Create an Async function to ensure that if we have files we can return the new user profile once they are uploaded.
+		const updateSettings = async () => {
+			// If the request contains files
+			if (!isEmpty(req.files)) {
+				// If the request files contain an avatar
+				if (!isEmpty(req.files['avatar'])) {
+					console.log(req.user.avatar);
 
-// @route   POST /user/comment
-// @desc    Add record of comment to current user profile
-// @access  Private
-router.post(
-	'/comment',
-	passport.authenticate('jwt', { session: false }),
-	(req, res) => {
-		const errors = {};
+					// If the current user avatar already exists
+					if (req.user.avatar) {
+						// Find record of existing upload and pass the path into fs.unlink() to delete from the file system
+						await Upload.findById(
+							req.user.avatar,
+							(err, oldUpload) => {
+								if (err) console.log(err);
+								else if (oldUpload === null)
+									res.json({
+										Error: 'cant find existing avatar',
+									});
+								// Delete file from file system
+								fs.unlink(oldUpload.path, err => {
+									if (err) console.log(err);
+								});
 
-		User.findById(req.user.id)
-			.then(user => {
-				if (!user) {
-					errors.nouser = 'Cannot find user';
-					res.status(404).json(errors);
-				} else {
-					const comment = { commentid: req.body.commentid };
-					if (
-						user.comments.some(
-							({ commentid }) => commentid === req.body.commentid
-						)
-					) {
-						errors.commentexists = 'This commentid already exists';
-						res.status(404).json(errors);
-					} else {
-						user.comments.unshift(comment);
-						user.save()
-							.then(user => res.status(201).json(user))
-							.catch(err =>
-								res.status(400).json({
-									error:
-										'Unable to save comment to user record.',
-								})
-							);
+								// Delete file document from collection
+								Upload.findByIdAndDelete(oldUpload.id, err => {
+									if (err)
+										res.json(`Delete document: ${err}`);
+								});
+							}
+						);
 					}
+					// New avatar = new upload document
+					const avatar = await ifFile(req, 'avatar');
+
+					// Add new upload document to accountSettings object
+					accountSettings.avatar = avatar._id;
+
+					// Find the new upload document and add user id
+					await Upload.findByIdAndUpdate(
+						avatar._id,
+						{
+							$set: { user: req.user.id },
+						},
+						{ new: true }
+					).catch(err => console.log(err));
 				}
-			})
-			.catch(err => res.status(404).json({ error: 'Cannot find user' }));
-	}
-);
 
-// @route   DELETE /user/comment
-// @desc    Delete record of comment from current user
-// @access  Private
-router.delete(
-	'/comment',
-	passport.authenticate('jwt', { session: false }),
-	(req, res) => {
-		const errors = {};
+				// If the request files contain a coverphoto
+				if (!isEmpty(req.files['coverphoto'])) {
+					// If the current user coverphoto already exists
+					if (req.user.coverphoto) {
+						// Find record of existing upload and pass into fs.unlink() to delete from the file system
+						await Upload.findById(
+							req.user.coverphoto,
+							(err, oldUpload) => {
+								if (err) console.log(err);
+								else if (oldUpload === null)
+									res.json({
+										Error: 'cant find existing coverphoto',
+									});
+								// Delete file from file system
+								fs.unlink(oldUpload.path, err => {
+									if (err) res.json(err);
+								});
 
-		User.findById(req.user.id).then(user => {
-			if (!user) {
-				errors.nouser = 'Cannot find user';
-				res.status(404).json(errors);
-			} else {
-				if (
-					user.comments.some(
-						({ commentid }) => commentid === req.body.commentid
-					)
-				) {
-					const removeIndex = user.comments
-						.map(comment => comment.commentid)
-						.indexOf(req.body.commentid);
-
-					user.comments.splice(removeIndex, 1);
-					user.save()
-						.then(user => res.status(200).json(user))
-						.catch(err =>
-							res.status(400).json({
-								error:
-									'Unable to remove comment from user record.',
-							})
+								// Delete file document from collection
+								Upload.findByIdAndDelete(oldUpload.id, err => {
+									if (err) console.log(err);
+								});
+							}
 						);
-				} else {
-					errors.nocomment = 'No comment with this id to remove';
-					res.status(404).json(errors);
-				}
-			}
-		});
-	}
-);
+					}
 
-// @route   POST /user/like
-// @desc    Add record of likes to current user profile
-// @access  Private
-router.post(
-	'/like',
-	passport.authenticate('jwt', { session: false }),
-	(req, res) => {
-		const errors = {};
+					// New coverphoto = new upload document
+					const coverphoto = await ifFile(req, 'coverphoto');
 
-		const like = { likeid: req.body.likeid };
+					// Add new upload document to accountSettings object
+					accountSettings.coverphoto = coverphoto._id;
 
-		User.findById(req.user.id).then(user => {
-			if (!user) {
-				errors.nouser = 'Cannot find user';
-				res.status(404).json(errors);
-			} else {
-				if (
-					user.likes.some(({ likeid }) => likeid === req.body.likeid)
-				) {
-					errors.alreadyliked = 'User has already liked this';
-					res.status(400).json(errors);
-				} else {
-					user.likes.unshift(like);
-					user.save()
-						.then(user => res.status(201).json(user))
-						.catch(err =>
-							res.status(400).json({
-								error: 'Unable to add like to user record.',
-							})
-						);
+					// Find the new upload document and add user id
+					await Upload.findByIdAndUpdate(
+						coverphoto._id,
+						{
+							$set: { user: req.user.id },
+						},
+						{ new: true }
+					).catch(err => console.log(err));
 				}
 			}
-		});
+			// Find and update the user document using the accountSettings object.
+			await User.findByIdAndUpdate(
+				req.user.id,
+				{ $set: accountSettings },
+				{ new: true },
+				(err, user) => {
+					err ? res.json(err) : res.json(user);
+				}
+			)
+				.populate('avatar', ['filename', 'path'])
+				.populate('coverphoto', ['filename', 'path'])
+				.populate({
+					path: 'following',
+					populate: {
+						path: 'user',
+						model: ['handle', 'avatar'],
+					},
+				})
+				.catch(err => console.log(err));
+		};
+		updateSettings().catch(err => console.log(err));
 	}
 );
 
-// @route   DELETE /user/like
-// @desc    Remove record of like from current user
-// @access  Private
-router.delete(
-	'/like',
+router.get(
+	'/test2',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		const errors = {};
-
-		const like = { likeid: req.body.likeid };
-
-		// Find the logged in user
-		User.findById(req.user.id).then(user => {
-			if (!user) {
-				errors.nouser = 'Cannot find user';
-				res.status(404).json(errors);
-			} else {
-				// Check that the likeid already exists in the user and then splice out of likes array
-				if (
-					user.likes.some(({ likeid }) => likeid === req.body.likeid)
-				) {
-					const removeIndex = user.likes
-						.map(like => like.likeid)
-						.indexOf(req.body.likeid);
-
-					user.likes.splice(removeIndex, 1);
-					user.save()
-						.then(user => res.status(200).json(user))
-						.catch(err =>
-							res.status(400).json({
-								error:
-									'Unable to remove like from user record.',
-							})
-						);
-				} else {
-					errors.like = 'Already unliked';
-					res.status(400).json(errors);
-				}
-			}
-		});
+		Upload.findById(req.user.avatar)
+			.then(upload => res.json(upload.path))
+			.catch(err => res.json(err));
 	}
 );
-
-// @route   POST /user/club
-// @desc    Add / Edit record of club membership to current user
-// @access  Private
-router.post(
-	'/club',
-	passport.authenticate('jwt', { session: false }),
-	(req, res) => {
-		const errors = {};
-
-		// Find the user for the logged in user
-		User.findById(req.user.id).then(user => {
-			if (!user) {
-				errors.nouser = 'Cannot find user';
-				res.status(404).json(errors);
-			} else {
-				const club = {};
-				club.clubid = req.body.clubid;
-				if (req.body.clubname) club.name = req.body.clubname;
-				if (req.body.role) club.role = req.body.role;
-				if (req.body.permissions)
-					club.permissions = req.body.permissions;
-
-				if (
-					user.clubs.some(({ clubid }) => clubid === req.body.clubid)
-				) {
-					const removeIndex = user.clubs
-						.map(club => club.clubid)
-						.indexOf(req.body.clubid);
-
-					if (!club.permissions)
-						club.permissions = user.clubs[removeIndex].permissions;
-					if (!club.name) club.name = user.clubs[removeIndex].name;
-					if (!club.role) club.role = user.clubs[removeIndex].role;
-
-					user.clubs.splice(removeIndex, 1);
-					user.clubs.push(club);
-					user.save()
-						.then(user => res.status(201).json(user))
-						.catch(err =>
-							res.status(400).json({
-								error:
-									'Unable to edit club information to user record.',
-							})
-						);
-				} else {
-					user.clubs.push(club);
-					user.save()
-						.then(user => res.status(201).json(user))
-						.catch(err =>
-							res.status(400).json({
-								error:
-									'Unable to add club information to user record.',
-							})
-						);
-				}
-			}
-		});
-	}
-);
-
-// @route   DELETE /user/club
-// @desc    Delete record of club membership from current user
-// @access  Private
-router.delete(
-	'/club',
-	passport.authenticate('jwt', { session: false }),
-	(req, res) => {
-		const errors = {};
-
-		// Find the user for the logged in user
-		User.findById(req.user.id).then(user => {
-			if (!user) {
-				errors.nouser = 'Cannot find user';
-				res.status(404).json(errors);
-			} else {
-				// Find a club with the correct clubid
-				if (
-					user.clubs.some(({ clubid }) => clubid === req.body.clubid)
-				) {
-					const removeIndex = user.clubs
-						.map(club => club.clubid)
-						.indexOf(req.body.clubid);
-
-					user.clubs.splice(removeIndex, 1);
-					user.save()
-						.then(user => res.status(200).json(user))
-						.catch(err =>
-							res.status(400).json({
-								error:
-									'Unable to remove club from user record.',
-							})
-						);
-				} else {
-					errors.club = 'Not a member of this club';
-					res.status(400).json(errors);
-				}
-			}
-		});
-	}
-);
-
-// TODO
-// @route   POST /user/post
-// @desc    Add record of post to current user
-// @access  Private
-
-// TODO
-// @route   DELETE /user/post
-// @desc    Delete record of post to current user
-// @access  Private
 
 module.exports = router;

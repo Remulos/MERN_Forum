@@ -71,19 +71,6 @@ process.on('SIGINT', () => {
 	});
 });
 
-// Passport middleware
-app.use(passport.initialize());
-
-// Passport Config
-require('./config/passport')(passport);
-
-// Setup routes
-app.use('/user', user);
-app.use('/post', post);
-app.use('/file', file);
-app.use('/admin', admin);
-app.use('/test', require('./routes/api/test'));
-
 // Basic error handler
 //app.use((err, req, res) => {
 //console.error(err);
