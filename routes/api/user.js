@@ -377,8 +377,6 @@ router.post(
 			if (!isEmpty(req.files)) {
 				// If the request files contain an avatar
 				if (!isEmpty(req.files['avatar'])) {
-					console.log(req.user.avatar);
-
 					// If the current user avatar already exists
 					if (req.user.avatar) {
 						// Find record of existing upload and pass the path into fs.unlink() to delete from the file system
@@ -485,14 +483,13 @@ router.post(
 	}
 );
 
-router.get(
-	'/test2',
+// @route   DELETE /user/delete
+// @desc    Delete current user
+// @access  Private
+router.delete(
+	'/delete',
 	passport.authenticate('jwt', { session: false }),
-	(req, res) => {
-		Upload.findById(req.user.avatar)
-			.then(upload => res.json(upload.path))
-			.catch(err => res.json(err));
-	}
+	(req, res) => {}
 );
 
 module.exports = router;
