@@ -67,16 +67,22 @@ router.get(
 	}
 );
 
-// @route   GET /admin/users/search?handle
+// @route   GET /admin/users/find?handle&page
 // @desc    Find users by handle
 // @access  Admin
+// TODO - Remove user password from returned information
 router.get(
-	'/users/search',
+	'/users/find',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
 	(req, res) => {
+		const skip = (req.params.page - 1) * 25;
 		// Search entire 'users' collection by handle for the regular expression of the search query
-		User.find({ handle: { $regex: req.query.handle, $options: 'i' } })
+		User.find(
+			{ handle: { $regex: req.query.handle, $options: 'i' } },
+			null,
+			[{ limit: 25 }, { skip: skip }]
+		)
 			.then(user => {
 				res.status(200).json(user);
 			})
@@ -87,6 +93,7 @@ router.get(
 // @route   GET /admin/user/:id
 // @desc    Find user
 // @access  Admin
+// TODO - Remove user password from returned information
 router.get(
 	'/user/:id',
 	passport.authenticate('jwt', { session: false }),
@@ -372,19 +379,72 @@ router.delete(
 	}
 );
 
-// @route   DELETE /admin/user
+// @route   DELETE /admin/upload/remove?upload
+// @desc    Find user upload and delete it.
+// @access  Admin
+router.delete(
+	'/upload/remove',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		// Make sure an upload document exists with the provided id.
+		Upload.findByIdAndRemove(req.query.upload, (err, upload) => {
+			if (err) res.status(404).json(err);
+			else {
+				// Find any user who is using this upload as an avatar or cover photo.
+				User.findOne(
+					{
+						$or: [
+							{ avatar: upload._id },
+							{ coverphoto: upload._id },
+						],
+					},
+					(err, user) => {
+						if (err) res.status(404).json(err);
+						if (user.avatar.toString() === upload._id.toString()) {
+							user.avatar = undefined;
+						} else if (
+							user.coverphoto.toString() === upload._id.toString()
+						) {
+							user.coverphoto = undefined;
+						}
+						user.save()
+							.then(user => res.json(user))
+							.catch(err => res.json(err));
+					}
+				);
+				fs.unlink(upload.path, err => {
+					if (err) res.json(err);
+				});
+			}
+		});
+	}
+);
+
+// @route   DELETE /admin/user?id
 // @desc    Find user and delete
 // @access  Admin
 router.delete(
-	'/user',
+	'/user?id',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
 	(req, res) => {
 		User.findById(req.body.id).then(user => {
 			// TODO - Find and remove all user likes
+			// TODO - Delete or archive user uploads
 			// TODO - Delete or archive user document
 		});
 	}
 );
+
+// @route   POST /admin/user/ban?id
+// @desc    Find user ban from creating new content for a specified period of time
+// @access  Admin
+// TODO - Create POST /admin/user/ban?id route
+
+// @route		POST /admin/user/unban?id
+// @desc		Find user and remove ban from account
+// @access	Admin
+// TODO - Create POST /admin/user/unban?id route
 
 module.exports = router;

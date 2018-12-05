@@ -21,9 +21,9 @@ const UserSchema = new Schema({
 	about: {
 		type: String,
 	},
-	date: {
+	registerdate: {
 		type: Date,
-		default: Date.now,
+		required: true,
 	},
 	dob: {
 		type: Date,
@@ -184,6 +184,9 @@ const UserSchema = new Schema({
 	allowfollow: {
 		type: Boolean,
 		default: true,
+	},
+	lastloggedin: {
+		type: Date,
 	},
 });
 

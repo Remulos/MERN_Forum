@@ -52,7 +52,7 @@ router.post(
 // @route   GET /file/uploads/:id
 // @desc    Get file from id
 // @access  Public
-// TODO  		Link to filesystem
+// TODO - Link to filesystem
 router.get('/uploads/:id', (req, res) => {
 	Upload.findOne({ _id: req.params.id })
 		.populate('user', ['handle', 'avatar'])
@@ -129,7 +129,7 @@ router.delete(
 // @route   GET /file/uploads/user/:id
 // @desc    Get all files uploaded by user
 // @access  Public
-// TODO  		Link to filesystem
+// TODO - Link to filesystem
 router.get(
 	'/uploads/user/:id',
 	passport.authenticate('jwt', { session: false }),

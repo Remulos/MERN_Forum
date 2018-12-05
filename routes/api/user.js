@@ -60,6 +60,7 @@ router.post(
 							dob: req.body.dob,
 							timezone: req.body.timezone,
 							role: 'Civilian',
+							registerdate: Date.now(),
 						};
 
 						// Check to see if any files were uploaded.
@@ -174,6 +175,10 @@ router.post('/login', (req, res) => {
 							});
 						}
 					);
+					user.lastloggedin = Date.now();
+					user.save((err, product) => {
+						if (err) console.log(err);
+					});
 				} else {
 					errors.password = 'Incorrect password';
 					res.status(404).json(errors);
@@ -206,17 +211,21 @@ router.get(
 	}
 );
 
-// @route   GET /user/find?handle
+// @route   GET /user/find?handle&page
 // @desc    Find users by handle
 // @access  Private
-// TODO - add search limit
 router.get(
 	'/find',
 	// Uncomment this to make searching user profiles private
 	//passport.authenticate('jwt', { session: false }),
 	(req, res) => {
+		const skip = (req.params.page - 1) * 25;
 		// Find all users with handles matching the regular expression of the request query parameters.
-		User.find({ handle: { $regex: req.query.handle, $options: 'i' } })
+		User.find(
+			{ handle: { $regex: req.query.handle, $options: 'i' } },
+			null,
+			[{ limit: 25 }, { skip: skip }]
+		)
 			.populate('avatar', ['path', 'filename'])
 			.then(user => {
 				const getSearchData = async () => {
@@ -268,6 +277,8 @@ router.get('/profile/:handle', (req, res) => {
 			foundUser.gender = user.gender;
 			foundUser.location = user.location;
 			foundUser.contentCount = user.contentCount;
+			foundUser.registerdate = user.registerdate;
+			foundUser.lastloggedin = user.lastloggedin;
 
 			res.status(200).json(foundUser);
 		})
@@ -489,7 +500,16 @@ router.post(
 router.delete(
 	'/delete',
 	passport.authenticate('jwt', { session: false }),
-	(req, res) => {}
+	(req, res) => {
+		User.findById(req.user.id, (err, user) => {
+			if (err) console.log(err);
+			else {
+				// TODO - Find and remove all user likes
+				// TODO - Delete or archive user uploads
+				// TODO - Delete or archive user document
+			}
+		});
+	}
 );
 
 module.exports = router;
