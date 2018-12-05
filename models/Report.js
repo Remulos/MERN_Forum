@@ -16,7 +16,6 @@ const ReportSchema = new Schema({
 	},
 	item: {
 		type: Schema.Types.ObjectId,
-		ref: 'comment',
 	},
 	type: {
 		type: String,

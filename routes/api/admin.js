@@ -7,6 +7,9 @@ const fs = require('fs');
 // Load models
 const User = require('../../models/User');
 const Post = require('../../models/Post');
+const Upload = require('../../models/Upload');
+const Report = require('../../models/Report');
+const Comment = require('../../models/Comment');
 
 const requireRole = require('../../src/modules/requireRole');
 const ifFile = require('../../src/modules/ifFile');
@@ -39,7 +42,7 @@ router.get(
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
 	(req, res) => {
-		Post.estimatedDocumentCount((err, count) => {
+		Post.countDocuments((err, count) => {
 			if (err) {
 				res.status(400).json(err);
 			} else {
@@ -67,16 +70,21 @@ router.get(
 	}
 );
 
+// @route   GET admin/total-comments
+// @desc    Get total number of comments in file system
+// @access  Admin
+// TODO - Add total number of comments route
+
 // @route   GET admin/users/find?handle&page
 // @desc    Find users by handle
 // @access  Admin
 // TODO - Remove user password from returned information
 router.get(
-	'/users/find',
+	'/users/find?handle&page',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
 	(req, res) => {
-		const skip = (req.params.page - 1) * 25;
+		const skip = (req.query.page - 1) * 25;
 		// Search entire 'users' collection by handle for the regular expression of the search query
 		User.find(
 			{ handle: { $regex: req.query.handle, $options: 'i' } },
@@ -450,7 +458,90 @@ router.delete(
 // @route		GET /admin/uploads/reports
 // @desc		Retrieve all reported uploads
 // @access	Admin
-// TODO - Create POST /admin/uploads/reports route
+// TODO - Route returning before being populated.
+router.get(
+	'/reports',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const skip = (req.query.page - 1) * 25;
+		// Find all reports
+		Report.find({}, null, [{ limit: 25 }, { skip: skip }])
+			.then(reports => {
+				// Create an array of reports populated by their items
+				const foundReports = [];
+
+				// Loop through reports finding the relevant document and attaching it
+				reports.forEach(report => {
+					const reportItem = {
+						reporter: report.reporter,
+						category: report.category,
+						text: report.text,
+						status: report.status,
+						date: report.date,
+						type: report.type,
+						item: [],
+					};
+
+					// Detemine the model to findById based on the report 'type'
+					switch (report.type) {
+						case 'User':
+							User.findById(
+								report.item.toHexString(),
+								(err, user) => {
+									if (err) console.log(err);
+									else {
+										reportItem.item = user;
+										foundReports.unshift(reportItem);
+									}
+								}
+							);
+							break;
+						case 'Post':
+							Post.findById(
+								report.item.toHexString(),
+								(err, post) => {
+									if (err) console.log(err);
+									else {
+										console.log(post);
+										reportItem.item.push(post);
+										foundReports.unshift(reportItem);
+									}
+								}
+							);
+							break;
+						case 'Upload':
+							Upload.findById(
+								report.item.toHexString(),
+								(err, upload) => {
+									if (err) console.log(err);
+									else {
+										reportItem.item = upload;
+										foundReports.unshift(reportItem);
+									}
+								}
+							);
+							break;
+						case 'Comment':
+							Comment.findById(
+								report.item.toHexString(),
+								(err, comment) => {
+									if (err) console.log(err);
+									else {
+										reportItem.item = comment;
+										foundReports.unshift(reportItem);
+									}
+								}
+							);
+							break;
+						default:
+							break;
+					}
+				});
+				res.json(foundReports);
+			})
+			.catch(err => res.json(err));
+	}
+);
 
 // @route		GET /admin/posts/reports
 // @desc		Retrieve all reported posts
