@@ -13,7 +13,7 @@ const ifFile = require('../../src/modules/ifFile');
 const isEmpty = require('../../src/modules/is-empty');
 const fileUpload = require('../../src/modules/fileUpload');
 
-// @route   GET /admin/total-users
+// @route   GET admin/total-users
 // @desc    Get total number of users
 // @access  Admin
 router.get(
@@ -31,7 +31,7 @@ router.get(
 	}
 );
 
-// @route   GET /admin/total-posts
+// @route   GET admin/total-posts
 // @desc    Get total number of posts in database
 // @access  Admin
 router.get(
@@ -49,7 +49,7 @@ router.get(
 	}
 );
 
-// @route   GET /admin/total-uploads
+// @route   GET admin/total-uploads
 // @desc    Get total number of uploads in file system
 // @access  Admin
 router.get(
@@ -67,7 +67,7 @@ router.get(
 	}
 );
 
-// @route   GET /admin/users/find?handle&page
+// @route   GET admin/users/find?handle&page
 // @desc    Find users by handle
 // @access  Admin
 // TODO - Remove user password from returned information
@@ -90,7 +90,7 @@ router.get(
 	}
 );
 
-// @route   GET /admin/user/:id
+// @route   GET admin/user/:id
 // @desc    Find user
 // @access  Admin
 // TODO - Remove user password from returned information
@@ -111,7 +111,7 @@ router.get(
 	}
 );
 
-// @route   POST /admin/user/:id
+// @route   POST admin/user/:id
 // @desc    Find user and edit
 // @access  Admin
 router.post(
@@ -337,7 +337,7 @@ router.post(
 	}
 );
 
-// @route   DELETE /admin/upload/remove?upload
+// @route   DELETE admin/upload/remove?upload
 // @desc    Find user upload and delete it.
 // @access  Admin
 router.delete(
@@ -379,7 +379,7 @@ router.delete(
 	}
 );
 
-// @route   DELETE /admin/upload/remove?upload
+// @route   DELETE admin/upload/remove?upload
 // @desc    Find user upload and delete it.
 // @access  Admin
 router.delete(
@@ -421,7 +421,7 @@ router.delete(
 	}
 );
 
-// @route   DELETE /admin/user?id
+// @route   DELETE admin/user?id
 // @desc    Find user and delete
 // @access  Admin
 router.delete(
@@ -446,5 +446,25 @@ router.delete(
 // @desc		Find user and remove ban from account
 // @access	Admin
 // TODO - Create POST /admin/user/unban?id route
+
+// @route		GET /admin/uploads/reports
+// @desc		Retrieve all reported uploads
+// @access	Admin
+// TODO - Create POST /admin/uploads/reports route
+
+// @route		GET /admin/posts/reports
+// @desc		Retrieve all reported posts
+// @access	Admin
+// TODO - Create POST /admin/posts/reports route
+
+// @route		GET /admin/comments/reports
+// @desc		Retrieve all reported comments
+// @access	Admin
+// TODO - Create POST /admin/comments/reports route
+
+// @route		GET /admin/users/reports
+// @desc		Retrieve all reported users
+// @access	Admin
+// TODO - Create POST /admin/users/reports route
 
 module.exports = router;

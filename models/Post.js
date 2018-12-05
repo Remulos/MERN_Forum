@@ -16,15 +16,12 @@ const PostSchema = new Schema({
 	},
 	attachments: [
 		{
-			upload: {
-				type: Schema.Types.ObjectId,
-				ref: 'upload',
-			},
+			type: Schema.Types.ObjectId,
+			ref: 'upload',
 		},
 	],
 	date: {
 		type: Date,
-		default: Date.now,
 	},
 	likes: [
 		{
@@ -40,10 +37,8 @@ const PostSchema = new Schema({
 	],
 	comments: [
 		{
-			comment: {
-				type: Schema.Types.ObjectId,
-				ref: 'comment',
-			},
+			type: Schema.Types.ObjectId,
+			ref: 'comment',
 		},
 	],
 	category: {

@@ -9,12 +9,12 @@ const Upload = require('../../models/Upload');
 // Load multer storage middleware method
 const fileUpload = require('../../src/modules/fileUpload');
 
-// @route   GET /file/test
+// @route   GET file/test
 // @desc    Test route
 // @access  Public
 router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 
-// @route   POST /file
+// @route   POST file/
 // @desc    Upload array of files from input field 'file' - without adding to profile
 // @access  Private
 router.post(
@@ -49,7 +49,7 @@ router.post(
 	}
 );
 
-// @route   GET /file/uploads/:id
+// @route   GET file/uploads/:id
 // @desc    Get file from id
 // @access  Public
 // TODO - Link to filesystem
@@ -65,20 +65,20 @@ router.get('/uploads/:id', (req, res) => {
 		.catch(err => res.status(404).json(err));
 });
 
-// @route   DELETE /file
+// @route   DELETE file/delete/:id
 // @desc    Delete upload through id
 // @access  Private
 router.delete(
-	'/',
+	'/delete/:id',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		if (!req.body.fileid) {
+		if (!req.params.id) {
 			res.status(400).json({
 				NoID: 'Delete request contains no file ID',
 			});
 		} else {
 			// Find the Upload document in the database based by document id.
-			Upload.findOne({ _id: req.body.fileid }, (err, upload) => {
+			Upload.findOne({ _id: req.params.id }, (err, upload) => {
 				if (err) {
 					res.status(404).json({
 						IncorrectID: 'No file with this ID was found.',
@@ -91,7 +91,7 @@ router.delete(
 					) {
 						// Delete the record of the file from the database and use the returned document to delete(unlink) the file from the file system in the callback.
 						Upload.findOneAndDelete(
-							{ _id: req.body.fileid },
+							{ _id: req.params.id },
 							(err, upload) => {
 								if (err) {
 									res.status(404).json({
@@ -126,7 +126,7 @@ router.delete(
 	}
 );
 
-// @route   GET /file/uploads/user/:id
+// @route   GET file/uploads/user/:id
 // @desc    Get all files uploaded by user
 // @access  Public
 // TODO - Link to filesystem
@@ -140,10 +140,16 @@ router.get(
 					Error: 'Unable to find any files with this user id.',
 				});
 			} else {
+				// TODO - find file uploader and do not return upload if avatar or coverphoto
 				res.status(200).json(uploads);
 			}
 		});
 	}
 );
+
+// @route   POST /upload/report
+// @desc    Report upload
+// @access  Private
+// TODO - Add upload reporting route
 
 module.exports = router;

@@ -13,12 +13,12 @@ const encryptPassword = require('../../src/modules/encryptPassword');
 const ifFile = require('../../src/modules/ifFile');
 const isEmpty = require('../../src/modules/is-empty');
 
-// @route   GET /user/test
+// @route   GET user/test
 // @desc    Test route
 // @access  Public
 router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 
-// @route   POST /user/register
+// @route   POST user/register
 // @desc    Register new user
 // @access  Public
 // @ TODO	-	Test without upload
@@ -136,7 +136,7 @@ router.post(
 	}
 );
 
-// @route   POST /user/login
+// @route   POST user/login
 // @desc    Log in existing user
 // @access  Public
 router.post('/login', (req, res) => {
@@ -188,7 +188,7 @@ router.post('/login', (req, res) => {
 	});
 });
 
-// @route   GET /user
+// @route   GET user/
 // @desc    Get current user account settings
 // @access  Private
 router.get(
@@ -211,7 +211,7 @@ router.get(
 	}
 );
 
-// @route   GET /user/find?handle&page
+// @route   GET user/find?handle&page
 // @desc    Find users by handle
 // @access  Private
 router.get(
@@ -253,7 +253,7 @@ router.get(
 	}
 );
 
-// @route   GET /user/profile/:handle
+// @route   GET user/profile/:handle
 // @desc    View user profile
 // @access  Public
 router.get('/profile/:handle', (req, res) => {
@@ -287,7 +287,7 @@ router.get('/profile/:handle', (req, res) => {
 		);
 });
 
-// @route   POST /user/edit
+// @route   POST user/edit
 // @desc    Edit current user model values
 // @access  Private
 router.post(
@@ -494,7 +494,7 @@ router.post(
 	}
 );
 
-// @route   DELETE /user/delete
+// @route   DELETE user/delete
 // @desc    Delete current user
 // @access  Private
 router.delete(
@@ -511,5 +511,10 @@ router.delete(
 		});
 	}
 );
+
+// @route   POST user/report
+// @desc    Report user
+// @access  Private
+// TODO - Add user reporting route
 
 module.exports = router;

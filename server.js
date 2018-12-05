@@ -15,6 +15,7 @@ const user = require('./routes/api/user');
 const post = require('./routes/api/post');
 const file = require('./routes/api/file');
 const admin = require('./routes/api/admin');
+const report = require('./routes/api/report');
 
 // bodyParser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -33,6 +34,7 @@ app.use('/user', user);
 app.use('/post', post);
 app.use('/file', file);
 app.use('/admin', admin);
+app.use('/report', report);
 
 const uri = require('./config/keys').mongoURI;
 
