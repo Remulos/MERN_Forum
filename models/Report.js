@@ -21,15 +21,18 @@ const ReportSchema = new Schema({
 		type: String,
 		required: true,
 	},
-	date: [
+	status: [
 		{
-			type: Date,
-			required: true,
-		},
+			date: {
+				type: Date,
+				default: Date.now,
+			},
+			status: {
+				type: String,
+				required: true,
+			}
+		}
 	],
-	status: {
-		type: String,
-	},
 });
 
 module.exports = Report = mongoose.model('report', ReportSchema);

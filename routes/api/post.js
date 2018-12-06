@@ -89,11 +89,11 @@ router.get(
 	}
 );
 
-// @route   POST post/edit/:id
+// @route   PUT post/edit/:id
 // @desc    Edit post
 // @access  Private
 // TODO - Add file CRUD functionality
-router.post(
+router.put(
 	'/edit/:id',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {

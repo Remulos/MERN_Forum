@@ -287,10 +287,10 @@ router.get('/profile/:handle', (req, res) => {
 		);
 });
 
-// @route   POST user/edit
+// @route   PUT user/edit
 // @desc    Edit current user model values
 // @access  Private
-router.post(
+router.put(
 	'/edit',
 	passport.authenticate('jwt', { session: false }),
 	fileUpload.fields([

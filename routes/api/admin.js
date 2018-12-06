@@ -73,7 +73,24 @@ router.get(
 // @route   GET admin/total-comments
 // @desc    Get total number of comments in file system
 // @access  Admin
-// TODO - Add total number of comments route
+router.get('/total-comments', passport.authenticate('jwt', { session: false }),
+requireRole('Admin'), (req, res) => {
+	Comment.countDocuments((err, count) => {
+		if(err) res.json(err);
+		else res.json(count);
+	})
+})
+
+// @route   GET admin/total-reports/active
+// @desc    Get total number of reports in file system
+// @access  Admin
+router.get('/total-reports/active', passport.authenticate('jwt', { session: false }),
+requireRole('Admin'), (req, res) => {
+	Report.countDocuments((err, count) => {
+		if(err) res.json(err);
+		else res.json(count);
+	})
+})
 
 // @route   GET admin/users/find?handle&page
 // @desc    Find users by handle
@@ -119,10 +136,10 @@ router.get(
 	}
 );
 
-// @route   POST admin/user/:id
+// @route   PUT admin/user/:id
 // @desc    Find user and edit
 // @access  Admin
-router.post(
+router.put(
 	'/user/:id',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
@@ -450,13 +467,13 @@ router.delete(
 // @access  Admin
 // TODO - Create POST /admin/user/ban?id route
 
-// @route		POST /admin/user/unban?id
-// @desc		Find user and remove ban from account
+// @route	POST /admin/user/unban?id
+// @desc	Find user and remove ban from account
 // @access	Admin
 // TODO - Create POST /admin/user/unban?id route
 
-// @route		GET /admin/reports
-// @desc		Retrieve all reports
+// @route	GET /admin/reports
+// @desc	Retrieve all reports
 // @access	Admin
 router.get(
 	'/reports',
@@ -476,7 +493,6 @@ router.get(
 								category: report.category,
 								text: report.text,
 								type: report.type,
-								date: report.date,
 								status: report.status,
 							}
 							
@@ -508,5 +524,67 @@ router.get(
 			.catch(err => res.json(err));
 	}
 );
+
+// @route	GET admin/report/:id
+// @desc	Retrieve a report and populate
+// @access	Admin
+router.get('/report/:id', passport.authenticate('jwt', {session:false}), requireRole('Admin'), (req,res) => {
+	Report.findById(req.params.id).then(report => {
+		const returnPopulatedReport = async () => {
+			const populateReport = async () => {
+
+					const reportItem = {
+						reporter: report.reporter,
+						category: report.category,
+						text: report.text,
+						type: report.type,
+						status: report.status,
+					}
+					
+					switch (report.type){
+						case 'User':
+						reportItem.item = await User.findById(report.item);
+						break;
+						case 'Post':
+						reportItem.item = await Post.findById(report.item).catch(err => console.log(err));
+						break;
+						case 'Upload':
+						reportItem.item = await Upload.findById(report.item);
+						break;
+						case 'Comment':
+						reportItem.item = await Comment.findById(report.item);
+						break;
+						default:
+						break;
+					}
+				
+				return reportItem;
+			}
+			res.json(await populateReport());
+		}
+		returnPopulatedReport();
+	})
+})
+
+// @route	PUT admin/report/:id
+// @desc	Change status of report
+// @access	Admin
+router.put('/report/:id', passport.authenticate('jwt', {session:false}), requireRole('Admin'), (req, res) => {
+	Report.findById(req.params.id).then(report => {
+		newStatus = {
+			status: req.body.status
+		}
+		report.status.unshift(newStatus);
+		report.save((err, report) => {
+			if(err) res.json(err);
+			else res.json(report);
+		})
+	})
+})
+
+// @route	PUT admin/report/:id
+// @desc	Move report to completed collection
+// @access	Admin
+
 
 module.exports = router;
