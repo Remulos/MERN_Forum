@@ -455,8 +455,8 @@ router.delete(
 // @access	Admin
 // TODO - Create POST /admin/user/unban?id route
 
-// @route		GET /admin/uploads/reports
-// @desc		Retrieve all reported uploads
+// @route		GET /admin/reports
+// @desc		Retrieve all reports
 // @access	Admin
 // TODO - Route returning before being populated.
 router.get(
@@ -467,95 +467,31 @@ router.get(
 		// Find all reports
 		Report.find({}, null, [{ limit: 25 }, { skip: skip }])
 			.then(reports => {
-				// Create an array of reports populated by their items
-				const foundReports = [];
+				const populateReports = async () => {
+					// Create an array of reports populated by their items
+					const foundReports = [];
 
-				// Loop through reports finding the relevant document and attaching it
-				reports.forEach(report => {
-					const reportItem = {
-						reporter: report.reporter,
-						category: report.category,
-						text: report.text,
-						status: report.status,
-						date: report.date,
-						type: report.type,
-						item: [],
-					};
+					for (const report of reports) {
+						const reportItem = {
+							reporter: report.reporter,
+							category: report.category,
+							text: report.text,
+							status: report.status,
+							date: report.date,
+							type: report.type,
+						};
 
-					// Detemine the model to findById based on the report 'type'
-					switch (report.type) {
-						case 'User':
-							User.findById(
-								report.item.toHexString(),
-								(err, user) => {
-									if (err) console.log(err);
-									else {
-										reportItem.item = user;
-										foundReports.unshift(reportItem);
-									}
-								}
-							);
-							break;
-						case 'Post':
-							Post.findById(
-								report.item.toHexString(),
-								(err, post) => {
-									if (err) console.log(err);
-									else {
-										console.log(post);
-										reportItem.item.push(post);
-										foundReports.unshift(reportItem);
-									}
-								}
-							);
-							break;
-						case 'Upload':
-							Upload.findById(
-								report.item.toHexString(),
-								(err, upload) => {
-									if (err) console.log(err);
-									else {
-										reportItem.item = upload;
-										foundReports.unshift(reportItem);
-									}
-								}
-							);
-							break;
-						case 'Comment':
-							Comment.findById(
-								report.item.toHexString(),
-								(err, comment) => {
-									if (err) console.log(err);
-									else {
-										reportItem.item = comment;
-										foundReports.unshift(reportItem);
-									}
-								}
-							);
-							break;
-						default:
-							break;
+						reportItem.item = await Post.findById(report.item);
+
+						foundReports.unshift(reportItem);
 					}
-				});
-				res.json(foundReports);
+					return foundReports;
+				};
+
+				res.json(populateReports());
 			})
 			.catch(err => res.json(err));
 	}
 );
-
-// @route		GET /admin/posts/reports
-// @desc		Retrieve all reported posts
-// @access	Admin
-// TODO - Create POST /admin/posts/reports route
-
-// @route		GET /admin/comments/reports
-// @desc		Retrieve all reported comments
-// @access	Admin
-// TODO - Create POST /admin/comments/reports route
-
-// @route		GET /admin/users/reports
-// @desc		Retrieve all reported users
-// @access	Admin
-// TODO - Create POST /admin/users/reports route
 
 module.exports = router;
