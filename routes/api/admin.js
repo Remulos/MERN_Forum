@@ -458,7 +458,6 @@ router.delete(
 // @route		GET /admin/reports
 // @desc		Retrieve all reports
 // @access	Admin
-// TODO - Route returning before being populated.
 router.get(
 	'/reports',
 	passport.authenticate('jwt', { session: false }),
@@ -467,28 +466,44 @@ router.get(
 		// Find all reports
 		Report.find({}, null, [{ limit: 25 }, { skip: skip }])
 			.then(reports => {
-				const populateReports = async () => {
-					// Create an array of reports populated by their items
-					const foundReports = [];
+				const returnPopulatedReports = async () => {
+					const populateReports = async () => {
+						const foundReports =[];
 
-					for (const report of reports) {
-						const reportItem = {
-							reporter: report.reporter,
-							category: report.category,
-							text: report.text,
-							status: report.status,
-							date: report.date,
-							type: report.type,
-						};
+						for(const report of reports){
+							const reportItem = {
+								reporter: report.reporter,
+								category: report.category,
+								text: report.text,
+								type: report.type,
+								date: report.date,
+								status: report.status,
+							}
+							
+							switch (report.type){
+								case 'User':
+								reportItem.item = await User.findById(report.item);
+								break;
+								case 'Post':
+								reportItem.item = await Post.findById(report.item).catch(err => console.log(err));
+								break;
+								case 'Upload':
+								reportItem.item = await Upload.findById(report.item);
+								break;
+								case 'Comment':
+								reportItem.item = await Comment.findById(report.item);
+								break;
+								default:
+								break;
+							}
 
-						reportItem.item = await Post.findById(report.item);
-
-						foundReports.unshift(reportItem);
+							foundReports.unshift(reportItem);
+						}
+						return foundReports;
 					}
-					return foundReports;
-				};
-
-				res.json(populateReports());
+					res.json(await populateReports());
+				}
+				returnPopulatedReports();
 			})
 			.catch(err => res.json(err));
 	}
