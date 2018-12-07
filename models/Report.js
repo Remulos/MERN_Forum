@@ -30,9 +30,12 @@ const ReportSchema = new Schema({
 			status: {
 				type: String,
 				required: true,
-			}
-		}
+			},
+		},
 	],
 });
 
-module.exports = Report = mongoose.model('report', ReportSchema);
+const Report = mongoose.model('report', ReportSchema);
+const ArchivedReport = mongoose.model('archivedReport', ReportSchema);
+
+module.exports = { Report, ArchivedReport };

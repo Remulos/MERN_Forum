@@ -188,6 +188,20 @@ const UserSchema = new Schema({
 	lastloggedin: {
 		type: Date,
 	},
+	ban: [
+		{
+			reason: {
+				type: String,
+				required: true,
+			},
+			banDate: {
+				type: Date,
+			},
+			endDate: {
+				type: Date,
+			},
+		},
+	],
 });
 
 module.exports = User = mongoose.model('user', UserSchema);

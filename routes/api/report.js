@@ -3,11 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 
 // Load models
-const Report = require('../../models/Report');
-const User = require('../../models/User');
-const Upload = require('../../models/Upload');
-const Post = require('../../models/Post');
-const Comment = require('../../models/Comment');
+const Report = require('../../models/Report').Report;
 
 // @route   report/test
 // @desc    Testing the report route
@@ -26,10 +22,15 @@ router.post(
 			category: req.body.category,
 			text: req.body.text,
 			item: req.params.id,
-			date: [],
 			type: req.body.type,
 		});
-		newReport.date.push(Date.now());
+		const status = {
+			date: Date.now(),
+			status: req.body.status,
+		};
+
+		newReport.status.push(status);
+
 		newReport
 			.save()
 			.then(report => res.json(report))

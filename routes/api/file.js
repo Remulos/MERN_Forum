@@ -147,9 +147,4 @@ router.get(
 	}
 );
 
-// @route   POST /upload/report
-// @desc    Report upload
-// @access  Private
-// TODO - Add upload reporting route
-
 module.exports = router;

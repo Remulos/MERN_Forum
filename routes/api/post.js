@@ -1,9 +1,11 @@
 // TODO - Add server-side validation for category permissions
 const router = require('express').Router();
 const passport = require('passport');
+const fs = require('fs');
 
 // Load models
 const Post = require('../../models/Post');
+const Comment = require('../../models/Comment');
 
 // Load multer storage method
 const fileUpload = require('../../src/modules/fileUpload');
@@ -30,7 +32,6 @@ router.post(
 		});
 
 		if (isEmpty(req.files)) {
-			console.log('files not present');
 			newPost
 				.save()
 				.then(post => res.status(200).json(post))
@@ -92,7 +93,6 @@ router.get(
 // @route   PUT post/edit/:id
 // @desc    Edit post
 // @access  Private
-// TODO - Add file CRUD functionality
 router.put(
 	'/edit/:id',
 	passport.authenticate('jwt', { session: false }),
@@ -130,16 +130,119 @@ router.post(
 					post.user._id.toHexString() === req.user.id ||
 					req.user.role === 'Admin'
 				) {
-					// TODO - Delete or Archive post
+					post.remove();
 				}
 			})
 			.catch(err => res.json(err));
 	}
 );
 
-// @route   POST post/report
-// @desc    Report post
-// @access  Private
-// TODO - Add post reporting route
+// @route		POST post/:id/comment
+// @desc		Add comment to post
+// @access	Private
+router.post(
+	'/:id/comment',
+	passport.authenticate('jwt', { session: false }),
+	fileUpload.array('file'),
+	(req, res) => {
+		Post.findById(req.params.id).then(post => {
+			const comment = new Comment({
+				user: req.user.id,
+				date: Date.now(),
+				text: req.body.text,
+				type: 'Post',
+				ref: post.id,
+			});
+
+			if (isEmpty(req.files)) {
+				comment
+					.save()
+					.then(comment => {
+						post.comments.push(comment);
+						post.save();
+					})
+					.then(res.json(post))
+					.catch(err => res.json(err));
+			} else {
+				for (const file of req.files) {
+					const upload = new Upload({
+						filename: file.filename,
+						path: file.path,
+						mimetype: file.mimetype,
+						size: file.size,
+						originalname: file.originalname,
+						user: req.user.id,
+						date: Date.now(),
+					});
+
+					upload
+						.save()
+						.then(comment.attachments.push(upload))
+						.catch(err => res.status(400).json(err));
+				}
+				comment
+					.save()
+					.then(comment => {
+						post.comments.push(comment);
+						post.save().then(res.json(post));
+					})
+					.catch(err => res.json(err));
+			}
+		});
+	}
+);
+
+// @route		/post/comment/:id
+// @desc		Delete comment from post,
+// @access	Private
+// FIXME - comment not being removed from post comments array.
+router.delete(
+	'/comment/:id',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		console.log('Hi');
+		Comment.findById(req.params.id)
+			.then(comment => {
+				if (
+					comment.user._id === req.user.id ||
+					req.user.role === 'Admin'
+				) {
+					if (!isEmpty(comment.attachments)) {
+						for (const upload of comment.attachments) {
+							Upload.findByIdAndDelete(upload.id).then(upload => {
+								fs.unlink(upload.path, err => {
+									if (err) res.json(err);
+								});
+							});
+						}
+					}
+
+					Post.findById(comment.ref)
+						.then(post => {
+							const removeIndex = post.comments
+								.map(item => item.id)
+								.indexOf(comment.id);
+
+							if (removeIndex == -1) {
+								res.status(404).json({
+									error: 'No comment to delete',
+								});
+							} else {
+								// Splice out of array
+								post.comments.splice(removeIndex, 1);
+
+								// Save
+								post.save().then(post => res.json(post));
+							}
+						})
+						.then(comment.remove())
+						.catch(err => res.json(err));
+				} else {
+					res.status(401).json({ Error: 'Insufficient Permissions' });
+				}
+			})
+			.catch(err => res.json(err));
+	}
+);
 
 module.exports = router;

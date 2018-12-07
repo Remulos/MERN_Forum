@@ -5,7 +5,7 @@ const recursive = require('recursive-readdir');
 const fs = require('fs');
 
 // Load models
-const User = require('../../models/User');
+const User = require('../../models/User').User;
 const Post = require('../../models/Post');
 const Upload = require('../../models/Upload');
 const Report = require('../../models/Report');
@@ -73,24 +73,32 @@ router.get(
 // @route   GET admin/total-comments
 // @desc    Get total number of comments in file system
 // @access  Admin
-router.get('/total-comments', passport.authenticate('jwt', { session: false }),
-requireRole('Admin'), (req, res) => {
-	Comment.countDocuments((err, count) => {
-		if(err) res.json(err);
-		else res.json(count);
-	})
-})
+router.get(
+	'/total-comments',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Comment.countDocuments((err, count) => {
+			if (err) res.json(err);
+			else res.json(count);
+		});
+	}
+);
 
 // @route   GET admin/total-reports/active
 // @desc    Get total number of reports in file system
 // @access  Admin
-router.get('/total-reports/active', passport.authenticate('jwt', { session: false }),
-requireRole('Admin'), (req, res) => {
-	Report.countDocuments((err, count) => {
-		if(err) res.json(err);
-		else res.json(count);
-	})
-})
+router.get(
+	'/total-reports/active',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Report.countDocuments((err, count) => {
+			if (err) res.json(err);
+			else res.json(count);
+		});
+	}
+);
 
 // @route   GET admin/users/find?handle&page
 // @desc    Find users by handle
@@ -446,31 +454,45 @@ router.delete(
 	}
 );
 
-// @route   DELETE admin/user?id
-// @desc    Find user and delete
+// @route   POST /admin/ban/id
+// @desc    Find user ban from creating new content for a specified period of time
 // @access  Admin
-router.delete(
-	'/user?id',
+router.post(
+	'/ban/:id',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
 	(req, res) => {
-		User.findById(req.body.id).then(user => {
-			// TODO - Find and remove all user likes
-			// TODO - Delete or archive user uploads
-			// TODO - Delete or archive user document
+		User.findById(req.params.id).then(user => {
+			const ban = {
+				reason: req.body.reason,
+				banDate: Date.now(),
+				endDate: req.body.end,
+			};
+
+			user.ban.unshift(ban);
+			user.save((err, user) => {
+				err ? res.json(err) : res.json(user.ban);
+			});
 		});
 	}
 );
 
-// @route   POST /admin/user/ban?id
-// @desc    Find user ban from creating new content for a specified period of time
-// @access  Admin
-// TODO - Create POST /admin/user/ban?id route
-
 // @route	POST /admin/user/unban?id
 // @desc	Find user and remove ban from account
 // @access	Admin
-// TODO - Create POST /admin/user/unban?id route
+router.delete(
+	'/unban/:id',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		User.findById(req.params.id).then(user => {
+			const removedBan = user.ban.pop();
+			user.save()
+				.then(res.json(removedBan))
+				.catch(err => res.json(err));
+		});
+	}
+);
 
 // @route	GET /admin/reports
 // @desc	Retrieve all reports
@@ -485,40 +507,48 @@ router.get(
 			.then(reports => {
 				const returnPopulatedReports = async () => {
 					const populateReports = async () => {
-						const foundReports =[];
+						const foundReports = [];
 
-						for(const report of reports){
+						for (const report of reports) {
 							const reportItem = {
 								reporter: report.reporter,
 								category: report.category,
 								text: report.text,
 								type: report.type,
 								status: report.status,
-							}
-							
-							switch (report.type){
+							};
+
+							switch (report.type) {
 								case 'User':
-								reportItem.item = await User.findById(report.item);
-								break;
+									reportItem.item = await User.findById(
+										report.item
+									);
+									break;
 								case 'Post':
-								reportItem.item = await Post.findById(report.item).catch(err => console.log(err));
-								break;
+									reportItem.item = await Post.findById(
+										report.item
+									).catch(err => console.log(err));
+									break;
 								case 'Upload':
-								reportItem.item = await Upload.findById(report.item);
-								break;
+									reportItem.item = await Upload.findById(
+										report.item
+									);
+									break;
 								case 'Comment':
-								reportItem.item = await Comment.findById(report.item);
-								break;
+									reportItem.item = await Comment.findById(
+										report.item
+									);
+									break;
 								default:
-								break;
+									break;
 							}
 
 							foundReports.unshift(reportItem);
 						}
 						return foundReports;
-					}
+					};
 					res.json(await populateReports());
-				}
+				};
 				returnPopulatedReports();
 			})
 			.catch(err => res.json(err));
@@ -528,63 +558,100 @@ router.get(
 // @route	GET admin/report/:id
 // @desc	Retrieve a report and populate
 // @access	Admin
-router.get('/report/:id', passport.authenticate('jwt', {session:false}), requireRole('Admin'), (req,res) => {
-	Report.findById(req.params.id).then(report => {
-		const returnPopulatedReport = async () => {
-			const populateReport = async () => {
-
+router.get(
+	'/report/:id',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Report.findById(req.params.id).then(report => {
+			const returnPopulatedReport = async () => {
+				const populateReport = async () => {
 					const reportItem = {
 						reporter: report.reporter,
 						category: report.category,
 						text: report.text,
 						type: report.type,
 						status: report.status,
-					}
-					
-					switch (report.type){
+					};
+
+					switch (report.type) {
 						case 'User':
-						reportItem.item = await User.findById(report.item);
-						break;
+							reportItem.item = await User.findById(report.item);
+							break;
 						case 'Post':
-						reportItem.item = await Post.findById(report.item).catch(err => console.log(err));
-						break;
+							reportItem.item = await Post.findById(
+								report.item
+							).catch(err => console.log(err));
+							break;
 						case 'Upload':
-						reportItem.item = await Upload.findById(report.item);
-						break;
+							reportItem.item = await Upload.findById(
+								report.item
+							);
+							break;
 						case 'Comment':
-						reportItem.item = await Comment.findById(report.item);
-						break;
+							reportItem.item = await Comment.findById(
+								report.item
+							);
+							break;
 						default:
-						break;
+							break;
 					}
-				
-				return reportItem;
-			}
-			res.json(await populateReport());
-		}
-		returnPopulatedReport();
-	})
-})
+
+					return reportItem;
+				};
+				res.json(await populateReport());
+			};
+			returnPopulatedReport();
+		});
+	}
+);
 
 // @route	PUT admin/report/:id
 // @desc	Change status of report
 // @access	Admin
-router.put('/report/:id', passport.authenticate('jwt', {session:false}), requireRole('Admin'), (req, res) => {
-	Report.findById(req.params.id).then(report => {
-		newStatus = {
-			status: req.body.status
-		}
-		report.status.unshift(newStatus);
-		report.save((err, report) => {
-			if(err) res.json(err);
-			else res.json(report);
-		})
-	})
-})
+router.put(
+	'/report/:id',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Report.findById(req.params.id).then(report => {
+			newStatus = {
+				date: Date.now(),
+				status: req.body.status,
+			};
+			report.status.unshift(newStatus);
+			report.save((err, report) => {
+				if (err) res.json(err);
+				else res.json(report);
+			});
+		});
+	}
+);
 
 // @route	PUT admin/report/:id
 // @desc	Move report to completed collection
 // @access	Admin
-
+router.put(
+	'/report/archive/:id',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Report.findByIdAndDelete(req.params.id)
+			.then()
+			.catch(err => res.json(err));
+		const archivedReport = new ArchivedReport({
+			reporter: report.reporter,
+			category: report.category,
+			text: report.text,
+			item: report.item,
+			type: report.type,
+			status: report.status,
+		});
+		archivedReport
+			.save()
+			.then(archivedReport => res.json(archivedReport.id))
+			.catch(err => res.json(err));
+	}
+);
 
 module.exports = router;

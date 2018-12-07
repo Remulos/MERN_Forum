@@ -139,6 +139,7 @@ router.post(
 // @route   POST user/login
 // @desc    Log in existing user
 // @access  Public
+// TODO - Check for account suspension and prompt resume account before returning user.
 router.post('/login', (req, res) => {
 	const errors = {};
 
@@ -494,27 +495,29 @@ router.put(
 	}
 );
 
-// @route   DELETE user/delete
-// @desc    Delete current user
+// @route   PUT user/suspend/:id
+// @desc    Suspend user - anonomises all posts and comments and stops all communication to/from the user. User will not be able to log into the account without unsuspending.
 // @access  Private
-router.delete(
-	'/delete',
+router.put(
+	'/suspend/:id',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		User.findById(req.user.id, (err, user) => {
-			if (err) console.log(err);
-			else {
-				// TODO - Find and remove all user likes
-				// TODO - Delete or archive user uploads
-				// TODO - Delete or archive user document
+		User.findById(req.params.id).then(user => {
+			if (user.id === req.user.id || req.user.role === 'Admin') {
+				// TODO - suspend user account
 			}
 		});
 	}
 );
 
-// @route   POST user/report
-// @desc    Report user
+// @route		PUT user/resume/:id
+// @desc		Remove account suspension from user.
+// @access	Private
+// TODO - Create remove suspension route once suspension tech is figured out.
+
+// @route   DELETE user/delete/:id
+// @desc    GDPR Delete user and all user content. Content will be deleted, not anonomised, and will be irretrievable.
 // @access  Private
-// TODO - Add user reporting route
+// TODO - GDPR Delete
 
 module.exports = router;
