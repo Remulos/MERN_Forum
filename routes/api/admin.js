@@ -5,7 +5,7 @@ const recursive = require('recursive-readdir');
 const fs = require('fs');
 
 // Load models
-const User = require('../../models/User').User;
+const User = require('../../models/User');
 const Post = require('../../models/Post');
 const Upload = require('../../models/Upload');
 const Report = require('../../models/Report');
@@ -454,42 +454,35 @@ router.delete(
 	}
 );
 
-// @route   POST /admin/ban/id
-// @desc    Find user ban from creating new content for a specified period of time
-// @access  Admin
-router.post(
-	'/ban/:id',
-	passport.authenticate('jwt', { session: false }),
-	requireRole('Admin'),
-	(req, res) => {
-		User.findById(req.params.id).then(user => {
-			const ban = {
-				reason: req.body.reason,
-				banDate: Date.now(),
-				endDate: req.body.end,
-			};
-
-			user.ban.unshift(ban);
-			user.save((err, user) => {
-				err ? res.json(err) : res.json(user.ban);
-			});
-		});
-	}
-);
-
-// @route	POST /admin/user/unban?id
+// @route	POST /admin/user/unban:id/:ban
 // @desc	Find user and remove ban from account
 // @access	Admin
-router.delete(
-	'/unban/:id',
+router.put(
+	'/user/unban/:id/:ban',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
 	(req, res) => {
 		User.findById(req.params.id).then(user => {
-			const removedBan = user.ban.pop();
-			user.save()
-				.then(res.json(removedBan))
-				.catch(err => res.json(err));
+			const endIndex = user.ban
+				.map(ban => ban.id)
+				.indexOf(req.params.ban);
+
+			if (endIndex === -1) {
+				res.status(404).json({ Error: 'Ban ID not found' });
+			} else {
+				user.ban.splice(endIndex, 1);
+
+				const endingBan = {
+					reason: req.body.reason,
+					start: user.ban[endIndex].start,
+					end: Date.now(),
+				};
+
+				user.ban.splice(endIndex, 0, endingBan);
+				user.save((err, user) => {
+					err ? res.json(err) : res.json(user);
+				});
+			}
 		});
 	}
 );
@@ -651,6 +644,32 @@ router.put(
 			.save()
 			.then(archivedReport => res.json(archivedReport.id))
 			.catch(err => res.json(err));
+	}
+);
+
+// @route POST admin/ban/user/:id
+// @desc	Place a temporary ban on a user
+// @access	Admin
+router.post(
+	'/ban/user/:id',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		User.findById(req.params.id)
+			.then(user => {
+				const enddate = new Date(req.body.end).getTime();
+				const ban = {
+					reason: req.body.reason,
+					start: Date.now(),
+					end: enddate,
+				};
+
+				user.ban.unshift(ban);
+				user.save((err, user) => {
+					err ? res.json(err) : res.json(user);
+				});
+			})
+			.catch(err => res.json({ err: 'No user can be found' }));
 	}
 );
 

@@ -141,7 +141,6 @@ router.get(
 					Error: 'Unable to find any files with this user id.',
 				});
 			} else {
-				// TODO - find file uploader and do not return upload if avatar or coverphoto
 				const profilePicCheck = async () => {
 					const removeProfilePics = async () => {
 						const user = await User.findById(req.params.id);

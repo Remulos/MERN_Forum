@@ -10,6 +10,7 @@ const Comment = require('../../models/Comment');
 // Load multer storage method
 const fileUpload = require('../../src/modules/fileUpload');
 const isEmpty = require('../../src/modules/is-empty');
+const checkBanned = require('../../src/modules/checkBanned');
 
 // @route   GET post/test
 // @desc    Test post route
@@ -22,6 +23,7 @@ router.get('/test', (req, res) => res.status(200).json({ success: true }));
 router.post(
 	'/new',
 	passport.authenticate('jwt', { session: false }),
+	checkBanned(),
 	fileUpload.array('file'),
 	(req, res) => {
 		const newPost = new Post({

@@ -153,6 +153,8 @@ router.post('/login', (req, res) => {
 			res.status(404).json(errors);
 		}
 
+		// Check for suspension
+
 		// use bcrypt to compare the login password with the stored and hashed user password
 		bcrypt
 			.compare(password, user.password)

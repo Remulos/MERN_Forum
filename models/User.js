@@ -194,11 +194,13 @@ const UserSchema = new Schema({
 				type: String,
 				required: true,
 			},
-			banDate: {
+			start: {
 				type: Date,
+				required: true,
 			},
-			endDate: {
+			end: {
 				type: Date,
+				required: true,
 			},
 		},
 	],
