@@ -130,6 +130,7 @@ router.post(
 					post.user._id.toHexString() === req.user.id ||
 					req.user.role === 'Admin'
 				) {
+					// TODO - Remove files and uploads
 					post.remove();
 				}
 			})
@@ -195,7 +196,6 @@ router.post(
 // @route		/post/comment/:id
 // @desc		Delete comment from post,
 // @access	Private
-// FIXME - comment not being removed from post comments array.
 router.delete(
 	'/comment/:id',
 	passport.authenticate('jwt', { session: false }),
@@ -204,7 +204,7 @@ router.delete(
 		Comment.findById(req.params.id)
 			.then(comment => {
 				if (
-					comment.user._id === req.user.id ||
+					comment.user._id == req.user.id ||
 					req.user.role === 'Admin'
 				) {
 					if (!isEmpty(comment.attachments)) {
@@ -217,11 +217,15 @@ router.delete(
 						}
 					}
 
-					Post.findById(comment.ref)
-						.then(post => {
-							const removeIndex = post.comments
-								.map(item => item.id)
-								.indexOf(comment.id);
+					const deleteCommentFromPost = async () => {
+						try {
+							const post = await Post.findById(
+								comment.ref.toHexString()
+							);
+
+							const removeIndex = post.comments.indexOf(
+								comment._id
+							);
 
 							if (removeIndex == -1) {
 								res.status(404).json({
@@ -232,11 +236,18 @@ router.delete(
 								post.comments.splice(removeIndex, 1);
 
 								// Save
-								post.save().then(post => res.json(post));
+								await post.save((err, post) => {
+									err ? res.json(err) : res.json(post);
+								});
 							}
-						})
-						.then(comment.remove())
-						.catch(err => res.json(err));
+
+							await comment.remove();
+						} catch {
+							err => res.json(err);
+						}
+					};
+
+					deleteCommentFromPost();
 				} else {
 					res.status(401).json({ Error: 'Insufficient Permissions' });
 				}
@@ -246,3 +257,29 @@ router.delete(
 );
 
 module.exports = router;
+
+const deleteCommentFromPost = async () => {
+	try {
+		const post = await Post.findById(comment.ref.toHexString());
+
+		const removeIndex = post.comments.indexOf(comment._id);
+
+		if (removeIndex == -1) {
+			res.status(404).json({
+				error: 'No comment to delete',
+			});
+		} else {
+			// Splice out of array
+			post.comments.splice(removeIndex, 1);
+
+			// Save
+			await post.save((err, post) => {
+				err ? res.json(err) : res.json(post);
+			});
+		}
+
+		await comment.remove();
+	} catch {
+		err => res.json(err);
+	}
+};

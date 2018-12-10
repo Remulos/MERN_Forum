@@ -5,6 +5,7 @@ const fs = require('fs');
 
 // Load models
 const Upload = require('../../models/Upload');
+const User = require('../../models/User');
 
 // Load multer storage middleware method
 const fileUpload = require('../../src/modules/fileUpload');
@@ -141,7 +142,30 @@ router.get(
 				});
 			} else {
 				// TODO - find file uploader and do not return upload if avatar or coverphoto
-				res.status(200).json(uploads);
+				const profilePicCheck = async () => {
+					const removeProfilePics = async () => {
+						const user = await User.findById(req.params.id);
+
+						const avatarIndex = await uploads
+							.map(upload => upload.id)
+							.indexOf(user.avatar.toHexString());
+
+						const coverphotoIndex = await uploads
+							.map(upload => upload.id)
+							.indexOf(user.coverphoto.toHexString());
+
+						if (coverphotoIndex != -1) {
+							await uploads.splice(coverphotoIndex, 1);
+						}
+
+						if (avatarIndex != -1) {
+							await uploads.splice(avatarIndex, 1);
+						}
+						return uploads;
+					};
+					res.status(200).json(await removeProfilePics());
+				};
+				profilePicCheck();
 			}
 		});
 	}
