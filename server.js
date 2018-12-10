@@ -24,8 +24,6 @@ app.use(bodyParser.json());
 // Passport middleware
 app.use(passport.initialize());
 
-// TODO - Add middleware to check for banned status to all POST routes.
-
 // Passport Config
 require('./config/passport')(passport);
 

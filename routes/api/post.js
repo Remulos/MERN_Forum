@@ -98,6 +98,7 @@ router.get(
 router.put(
 	'/edit/:id',
 	passport.authenticate('jwt', { session: false }),
+	checkBanned(),
 	(req, res) => {
 		Post.findById(req.params.id)
 			.then(post => {
@@ -146,6 +147,7 @@ router.post(
 router.post(
 	'/:id/comment',
 	passport.authenticate('jwt', { session: false }),
+	checkBanned(),
 	fileUpload.array('file'),
 	(req, res) => {
 		Post.findById(req.params.id).then(post => {
@@ -259,29 +261,3 @@ router.delete(
 );
 
 module.exports = router;
-
-const deleteCommentFromPost = async () => {
-	try {
-		const post = await Post.findById(comment.ref.toHexString());
-
-		const removeIndex = post.comments.indexOf(comment._id);
-
-		if (removeIndex == -1) {
-			res.status(404).json({
-				error: 'No comment to delete',
-			});
-		} else {
-			// Splice out of array
-			post.comments.splice(removeIndex, 1);
-
-			// Save
-			await post.save((err, post) => {
-				err ? res.json(err) : res.json(post);
-			});
-		}
-
-		await comment.remove();
-	} catch {
-		err => res.json(err);
-	}
-};

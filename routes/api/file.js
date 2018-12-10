@@ -9,6 +9,7 @@ const User = require('../../models/User');
 
 // Load multer storage middleware method
 const fileUpload = require('../../src/modules/fileUpload');
+const checkBanned = require('../../src/modules/checkBanned');
 
 // @route   GET file/test
 // @desc    Test route
@@ -21,6 +22,7 @@ router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 router.post(
 	'/',
 	passport.authenticate('jwt', { session: false }),
+	checkBanned(),
 	fileUpload.array('file'),
 	(req, res) => {
 		if (!req.files) {
