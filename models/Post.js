@@ -41,7 +41,7 @@ const PostSchema = new Schema({
 			ref: 'comment',
 		},
 	],
-	category: {
+	division: {
 		type: String,
 		required: true,
 	},
@@ -58,5 +58,7 @@ const PostSchema = new Schema({
 		default: false,
 	},
 });
+
+PostSchema.plugin(require('mongoose-paginate'));
 
 module.exports = Post = mongoose.model('post', PostSchema);

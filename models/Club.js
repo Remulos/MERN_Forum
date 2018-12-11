@@ -44,4 +44,6 @@ const ClubSchema = new Schema({
 	],
 });
 
+ClubSchema.plugin(require('mongoose-paginate'));
+
 module.exports = Club = mongoose.model('club', ClubSchema);

@@ -34,4 +34,6 @@ const UploadSchema = new Schema({
 	},
 });
 
+UploadSchema.plugin(require('mongoose-paginate'));
+
 module.exports = Upload = mongoose.model('upload', UploadSchema);

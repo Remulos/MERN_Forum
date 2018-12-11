@@ -35,6 +35,8 @@ const ReportSchema = new Schema({
 	],
 });
 
+ReportSchema.plugin(require('mongoose-paginate'));
+
 const Report = mongoose.model('report', ReportSchema);
 const ArchivedReport = mongoose.model('archivedReport', ReportSchema);
 

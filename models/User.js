@@ -188,6 +188,14 @@ const UserSchema = new Schema({
 	lastloggedin: {
 		type: Date,
 	},
+	divisions: [
+		{
+			name: {
+				type: String,
+				default: 'Recruit',
+			},
+		},
+	],
 	ban: [
 		{
 			reason: {
@@ -205,5 +213,7 @@ const UserSchema = new Schema({
 		},
 	],
 });
+
+UserSchema.plugin(require('mongoose-paginate'));
 
 module.exports = User = mongoose.model('user', UserSchema);

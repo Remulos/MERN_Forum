@@ -62,6 +62,11 @@ router.post(
 							role: 'Civilian',
 							registerdate: Date.now(),
 						};
+						userInfo.divisions = [
+							{
+								name: 'Recruit',
+							},
+						];
 
 						// Check to see if any files were uploaded.
 						// Using isEmpty because even without uploads, req.files returns an empty object.
@@ -217,6 +222,7 @@ router.get(
 // @route   GET user/find?handle&page
 // @desc    Find users by handle
 // @access  Private
+// FIXME - replace with mongoose paginate
 router.get(
 	'/find',
 	// Uncomment this to make searching user profiles private

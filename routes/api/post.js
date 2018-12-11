@@ -2,6 +2,7 @@
 const router = require('express').Router();
 const passport = require('passport');
 const fs = require('fs');
+const paginate = require('mongoose-paginate');
 
 // Load models
 const Post = require('../../models/Post');
@@ -20,6 +21,7 @@ router.get('/test', (req, res) => res.status(200).json({ success: true }));
 // @route   POST post/
 // @desc    Create Post
 // @access  Public
+// TODO - test catagoryCheck middleware
 router.post(
 	'/new',
 	passport.authenticate('jwt', { session: false }),
@@ -30,7 +32,7 @@ router.post(
 			user: req.user.id,
 			title: req.body.title,
 			text: req.body.text,
-			category: req.body.category,
+			division: req.body.division,
 		});
 
 		if (isEmpty(req.files)) {
@@ -64,15 +66,46 @@ router.post(
 	}
 );
 
+// @route   GET post/Public
+// @desc    Get all posts
+// @access  Public
+router.get('/Public', (req, res) => {
+	Post.find({ division: 'Public' })
+		.then(posts => res.json(posts))
+		.catch(err => res.json(err));
+});
+
+// @route   GET post/:division?page
+// @desc    Get all posts from division
+// @access  Private
+router.get(
+	'/:division/',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const options = {
+			limit: 25,
+		};
+		if (req.query.page) options.page = req.query.page;
+		console.log(options);
+		Post.paginate({ division: req.params.division }, options)
+			.then(posts => res.json(posts.docs))
+			.catch(err => res.json(err));
+	}
+);
+
 // @route   GET post/:id
 // @desc    Get public post
 // @access  Public
-router.get('/:id', (req, res) => {
+router.get('/id/:id', (req, res) => {
 	Post.findById(req.params.id)
 		.populate('attachments', ['originalname', 'path'])
 		.populate('user', 'handle')
 		.populate('comment')
-		.then(post => res.json(post))
+		.then(post => {
+			if (post.division == 'Public') {
+				res.json(post);
+			} else res.status(401).json({ error: 'Not Authotised' });
+		})
 		.catch(err => res.json(err));
 });
 
@@ -80,7 +113,7 @@ router.get('/:id', (req, res) => {
 // @desc    Get private post
 // @access  Private
 router.get(
-	'/private:id',
+	'/id/private/:id',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
 		Post.findById(req.params.id)
@@ -197,7 +230,7 @@ router.post(
 	}
 );
 
-// @route		/post/comment/:id
+// @route		DELETE post/comment/:id
 // @desc		Delete comment from post,
 // @access	Private
 router.delete(
@@ -259,5 +292,7 @@ router.delete(
 			.catch(err => res.json(err));
 	}
 );
+
+// TODO - find all user posts
 
 module.exports = router;

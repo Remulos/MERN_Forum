@@ -673,4 +673,7 @@ router.post(
 	}
 );
 
+// TODO - Add new division route
+// TODO - Remove devision route
+
 module.exports = router;

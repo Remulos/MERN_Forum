@@ -10,13 +10,6 @@ const app = express();
 // Load models
 const User = require('./models/User');
 
-// Load route files
-const user = require('./routes/api/user');
-const post = require('./routes/api/post');
-const file = require('./routes/api/file');
-const admin = require('./routes/api/admin');
-const report = require('./routes/api/report');
-
 // bodyParser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -27,12 +20,13 @@ app.use(passport.initialize());
 // Passport Config
 require('./config/passport')(passport);
 
+// Load route files
 // Setup routes
-app.use('/user', user);
-app.use('/post', post);
-app.use('/file', file);
-app.use('/admin', admin);
-app.use('/report', report);
+app.use('/user', require('./routes/api/user'));
+app.use('/post', require('./routes/api/post'));
+app.use('/file', require('./routes/api/file'));
+app.use('/admin', require('./routes/api/admin'));
+app.use('/report', require('./routes/api/report'));
 
 const uri = require('./config/keys').mongoURI;
 

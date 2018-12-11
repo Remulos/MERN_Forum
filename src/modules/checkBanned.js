@@ -1,6 +1,8 @@
+const isEmpty = require('../modules/is-empty');
+
 module.exports = checkBanned = () => {
 	return (req, res, next) => {
-		if (req.user.ban) {
+		if (isEmpty(req.user.ban)) {
 			for (const ban of req.user.ban) {
 				const currentBan = Date.now() - ban.end;
 

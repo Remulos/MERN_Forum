@@ -29,4 +29,6 @@ const CommentSchema = new Schema({
 	],
 });
 
+CommentSchema.plugin(require('mongoose-paginate'));
+
 module.exports = Comment = mongoose.model('comment', CommentSchema);
