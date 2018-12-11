@@ -303,6 +303,22 @@ router.delete(
 	}
 );
 
-// TODO - find all user posts
+// @route		GET post/user/:id
+// @desc		Delete comment from post,
+// @access	Private
+router.get(
+	'/user/:id',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		const options = {
+			limit: 25,
+		};
+		if (req.query.page) options.page = req.query.page;
+
+		Post.paginate({ user: req.params.id }, options)
+			.then(posts => res.json(posts.docs))
+			.catch(err => res.json(err));
+	}
+);
 
 module.exports = router;
