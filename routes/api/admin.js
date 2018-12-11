@@ -673,7 +673,41 @@ router.post(
 	}
 );
 
+// @route	POST /admin/user/unban:id/:ban
+// @desc	Find user and remove ban from account
+// @access	Admin
+router.put(
+	'/user/unban/:id/:ban',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		User.findById(req.params.id).then(user => {
+			const endIndex = user.ban
+				.map(ban => ban.id)
+				.indexOf(req.params.ban);
+
+			if (endIndex === -1) {
+				res.status(404).json({ Error: 'Ban ID not found' });
+			} else {
+				user.ban.splice(endIndex, 1);
+
+				const endingBan = {
+					reason: req.body.reason,
+					start: user.ban[endIndex].start,
+					end: Date.now(),
+				};
+
+				user.ban.splice(endIndex, 0, endingBan);
+				user.save((err, user) => {
+					err ? res.json(err) : res.json(user);
+				});
+			}
+		});
+	}
+);
+
 // TODO - Add new division route
+// Division is just an array somewhere on the server
 // TODO - Remove devision route
 
 module.exports = router;

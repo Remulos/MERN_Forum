@@ -222,26 +222,27 @@ router.get(
 // @route   GET user/find?handle&page
 // @desc    Find users by handle
 // @access  Private
-// FIXME - replace with mongoose paginate
 router.get(
 	'/find',
 	// Uncomment this to make searching user profiles private
 	//passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		const skip = (req.params.page - 1) * 25;
+		const options = {
+			limit: 25,
+			populate: { path: 'avatar', select: 'path filename' },
+		};
+		if (req.query.page) options.page = req.query.page;
 		// Find all users with handles matching the regular expression of the request query parameters.
-		User.find(
+		User.paginate(
 			{ handle: { $regex: req.query.handle, $options: 'i' } },
-			null,
-			[{ limit: 25 }, { skip: skip }]
+			options
 		)
-			.populate('avatar', ['path', 'filename'])
 			.then(user => {
 				const getSearchData = async () => {
 					// Create an array for the restricted user documents.
 					const users = [];
 					// Cycle through eact returned user and add data to the foundUser object that is suitable for public viewing (no email addresses, etc.).
-					await user.forEach(user => {
+					await user.docs.forEach(user => {
 						const foundUser = {};
 						foundUser.id = user.id;
 						foundUser.handle = user.handle;

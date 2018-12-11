@@ -1,4 +1,3 @@
-// TODO - Add server-side validation for category permissions
 const router = require('express').Router();
 const passport = require('passport');
 const fs = require('fs');
@@ -21,47 +20,58 @@ router.get('/test', (req, res) => res.status(200).json({ success: true }));
 // @route   POST post/
 // @desc    Create Post
 // @access  Public
-// TODO - test catagoryCheck middleware
 router.post(
 	'/new',
 	passport.authenticate('jwt', { session: false }),
 	checkBanned(),
 	fileUpload.array('file'),
 	(req, res) => {
-		const newPost = new Post({
-			user: req.user.id,
-			title: req.body.title,
-			text: req.body.text,
-			division: req.body.division,
-		});
+		const divIndex = req.user.divisions
+			.map(division => division.name)
+			.indexOf(req.body.division);
 
-		if (isEmpty(req.files)) {
-			newPost
-				.save()
-				.then(post => res.status(200).json(post))
-				.catch(err => res.status(400).json(err));
-		} else {
-			// Cycle through all files in request, add attributes to new Upload object and save to uploads collection. Then add saved object to 'uploads' array.
-			req.files.forEach(file => {
-				const upload = new Upload({
-					filename: file.filename,
-					path: file.path,
-					mimetype: file.mimetype,
-					size: file.size,
-					originalname: file.originalname,
-					user: req.user.id,
-					date: Date.now(),
-				});
-
-				upload
-					.save()
-					.then(newPost.attachments.push(upload))
-					.catch(err => res.status(400).json(err));
+		if (divIndex === -1) {
+			res.status(401).json({
+				Error: `You must be a member of ${
+					req.body.division
+				} Division to post here.`,
 			});
-			newPost
-				.save()
-				.then(post => res.status(200).json(post))
-				.catch(err => res.status(400).json(err));
+		} else {
+			const newPost = new Post({
+				user: req.user.id,
+				title: req.body.title,
+				text: req.body.text,
+				division: req.body.division,
+			});
+
+			if (isEmpty(req.files)) {
+				newPost
+					.save()
+					.then(post => res.status(200).json(post))
+					.catch(err => res.status(400).json(err));
+			} else {
+				// Cycle through all files in request, add attributes to new Upload object and save to uploads collection. Then add saved object to 'uploads' array.
+				req.files.forEach(file => {
+					const upload = new Upload({
+						filename: file.filename,
+						path: file.path,
+						mimetype: file.mimetype,
+						size: file.size,
+						originalname: file.originalname,
+						user: req.user.id,
+						date: Date.now(),
+					});
+
+					upload
+						.save()
+						.then(newPost.attachments.push(upload))
+						.catch(err => res.status(400).json(err));
+				});
+				newPost
+					.save()
+					.then(post => res.status(200).json(post))
+					.catch(err => res.status(400).json(err));
+			}
 		}
 	}
 );
