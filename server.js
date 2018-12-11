@@ -5,10 +5,12 @@ const passport = require('passport');
 const scheduler = require('node-schedule');
 const fs = require('fs');
 
+const isEmpty = require('./src/modules/is-empty');
+
 const app = express();
 
-// Load models
 const User = require('./models/User');
+const Division = require('./models/Division');
 
 // bodyParser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -46,9 +48,20 @@ db.on('connecting', () =>
 	console.log(`Mongoose default connection to ${uri} is loading...`)
 );
 
-db.on('connected', () =>
-	console.log(`Mongoose default connection is open to ${uri}`)
-);
+db.on('connected', () => {
+	console.log(`Mongoose default connection is open to ${uri}`);
+	Division.find({}).then(divdoc => {
+		if (isEmpty(divdoc)) {
+			const divisions = [
+				{ name: 'Recruit', description: 'Everyone who signs up.' },
+				{ name: 'Member', description: 'Accepted members.' },
+			];
+
+			const addDevisions = new Division({ divarray: divisions });
+			addDevisions.save();
+		}
+	});
+});
 
 db.on('error', err =>
 	console.log(`Mongoose default connection has encountered ${err} error.`)
@@ -64,29 +77,6 @@ process.on('SIGINT', () => {
 			'Mongoose default connection is disconnected due to application termination'
 		);
 		process.exit(0);
-	});
-});
-
-// Basic error handler
-//app.use((err, req, res) => {
-//console.error(err);
-// If our routes specified a specific response, then send that. Otherwise,
-// send a generic message so as not to leak anything.
-//res.status(500).send(err.response || 'Something broke!');
-//});
-
-// Scheduled db stats query
-
-scheduler.scheduleJob('* 4 * * *', () => {
-	User.countDocuments((err, count) => {
-		fs.readFile('./logs/users.json', (err, data) => {
-			const json = JSON.parse(data);
-			const timestamp = Date.now();
-			json.push({ count: count, timestamp: timestamp });
-			fs.writeFile('./logs/users.json', JSON.stringify(json), err => {
-				if (err) throw err;
-			});
-		});
 	});
 });
 

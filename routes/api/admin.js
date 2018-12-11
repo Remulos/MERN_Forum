@@ -10,6 +10,7 @@ const Post = require('../../models/Post');
 const Upload = require('../../models/Upload');
 const Report = require('../../models/Report');
 const Comment = require('../../models/Comment');
+const Division = require('../../models/Division');
 
 const requireRole = require('../../src/modules/requireRole');
 const ifFile = require('../../src/modules/ifFile');
@@ -454,8 +455,8 @@ router.delete(
 	}
 );
 
-// @route	POST /admin/user/unban:id/:ban
-// @desc	Find user and remove ban from account
+// @route		POST /admin/user/unban:id/:ban
+// @desc		Find user and remove ban from account
 // @access	Admin
 router.put(
 	'/user/unban/:id/:ban',
@@ -487,8 +488,8 @@ router.put(
 	}
 );
 
-// @route	GET /admin/reports
-// @desc	Retrieve all reports
+// @route		GET /admin/reports
+// @desc		Retrieve all reports
 // @access	Admin
 router.get(
 	'/reports',
@@ -548,8 +549,8 @@ router.get(
 	}
 );
 
-// @route	GET admin/report/:id
-// @desc	Retrieve a report and populate
+// @route		GET admin/report/:id
+// @desc		Retrieve a report and populate
 // @access	Admin
 router.get(
 	'/report/:id',
@@ -599,8 +600,8 @@ router.get(
 	}
 );
 
-// @route	PUT admin/report/:id
-// @desc	Change status of report
+// @route		PUT admin/report/:id
+// @desc		Change status of report
 // @access	Admin
 router.put(
 	'/report/:id',
@@ -621,8 +622,8 @@ router.put(
 	}
 );
 
-// @route	PUT admin/report/:id
-// @desc	Move report to completed collection
+// @route		PUT admin/report/:id
+// @desc		Move report to completed collection
 // @access	Admin
 router.put(
 	'/report/archive/:id',
@@ -647,8 +648,8 @@ router.put(
 	}
 );
 
-// @route POST admin/ban/user/:id
-// @desc	Place a temporary ban on a user
+// @route 	POST admin/ban/user/:id
+// @desc		Place a temporary ban on a user
 // @access	Admin
 router.post(
 	'/ban/user/:id',
@@ -673,8 +674,8 @@ router.post(
 	}
 );
 
-// @route	POST /admin/user/unban:id/:ban
-// @desc	Find user and remove ban from account
+// @route		POST /admin/user/unban:id/:ban
+// @desc		Find user and remove ban from account
 // @access	Admin
 router.put(
 	'/user/unban/:id/:ban',
@@ -706,8 +707,64 @@ router.put(
 	}
 );
 
-// TODO - Add new division route
-// Division is just an array somewhere on the server
+// @route		POST /admin/division
+// @desc		Add division to array
+// @access	Admin
+router.post(
+	'/division',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Division.find({})
+			.then(divdocs => {
+				const divisions = divdocs[0].divarray;
+
+				console.log(divisions.some(e => e.name == req.body.division));
+
+				if (divisions.some(e => e.name == req.body.division)) {
+					res.status(400).json({
+						Error: 'This division already exists',
+					});
+				} else {
+					divisions.push({
+						name: req.body.division,
+						description: req.body.description,
+					});
+					divdocs[0]
+						.save()
+						.then(divdoc => res.json(divdoc))
+						.catch(err => res.json(err));
+				}
+			})
+			.catch(err => res.json(err));
+	}
+);
+
 // TODO - Remove devision route
+// @route		POST /admin/division
+// @desc		Add division to array
+// @access	Admin
+router.delete(
+	'/division',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Division.findOne({}).then(divdoc => {
+			const index = divdoc.divarray
+				.map(division => division.name)
+				.indexOf(req.body.division);
+
+			if (index == -1)
+				res.status(404).json('No division with that name exists');
+			else {
+				divdoc.divarray.splice(index, 1);
+				divdoc
+					.save()
+					.then(divdoc => res.json(divdoc))
+					.catch(err => res.json(err));
+			}
+		});
+	}
+);
 
 module.exports = router;

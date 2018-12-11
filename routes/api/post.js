@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const passport = require('passport');
 const fs = require('fs');
-const paginate = require('mongoose-paginate');
 
 // Load models
 const Post = require('../../models/Post');
