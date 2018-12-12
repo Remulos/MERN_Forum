@@ -5,8 +5,9 @@ const keys = require('../../config/keys');
 const passport = require('passport');
 const fs = require('fs');
 
-// Load User model to use in mongoose
-const User = require('../../models/User');
+// Load models
+const User = require('../../models/User').User;
+const ArchivedUser = require('../../models/User').ArchivedUser;
 
 const fileUpload = require('../../src/modules/fileUpload');
 const encryptPassword = require('../../src/modules/encryptPassword');
@@ -21,7 +22,6 @@ router.get('/test', (req, res) => res.status(200).json({ msg: 'success' }));
 // @route   POST user/register
 // @desc    Register new user
 // @access  Public
-// @ TODO	-	Test without upload
 router.post(
 	'/register',
 	fileUpload.fields([
@@ -144,10 +144,8 @@ router.post(
 // @route   POST user/login
 // @desc    Log in existing user
 // @access  Public
-// TODO - Check for account suspension and prompt resume account before returning user.
 router.post('/login', (req, res) => {
 	const errors = {};
-
 	const email = req.body.email;
 	const password = req.body.password;
 
@@ -392,6 +390,8 @@ router.put(
 			accountSettings.interests = req.body.interests.split(',');
 		}
 
+		if (req.body.division) accountSettings.divisions = req.body.divisions;
+
 		// Create an Async function to ensure that if we have files we can return the new user profile once they are uploaded.
 		const updateSettings = async () => {
 			// If the request contains files
@@ -504,29 +504,64 @@ router.put(
 	}
 );
 
-// @route   PUT user/suspend/:id
-// @desc    Suspend user - anonomises all posts and comments and stops all communication to/from the user. User will not be able to log into the account without unsuspending.
+// @route   DELETE user/delete/:id
+// @desc   Delete user data. All posts, comments and uploads will be kept to ensure continuity in conversations unless previously deleted.
 // @access  Private
-router.put(
-	'/suspend/:id',
+router.delete(
+	'/delete/:id',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		User.findById(req.params.id).then(user => {
-			if (user.id === req.user.id || req.user.role === 'Admin') {
-				// TODO - suspend user account
-			}
-		});
+		User.findByIdAndDelete(req.params.id)
+			.then(res.redirect('../../'))
+			.catch(err => res.json(err));
 	}
 );
 
-// @route		PUT user/resume/:id
-// @desc		Remove account suspension from user.
-// @access	Private
-// TODO - Create remove suspension route once suspension tech is figured out.
-
-// @route   DELETE user/delete/:id
+// @route   DELETE user/fulldelete/:id
 // @desc    GDPR Delete user and all user content. Content will be deleted, not anonomised, and will be irretrievable.
 // @access  Private
 // TODO - GDPR Delete
+router.delete(
+	'/fulldelete/:id',
+	passport.authenticate('jwt', { session: false }),
+	(req, res) => {
+		if (!isEmpty(req.user.avatar)) {
+		}
+
+		if (!isEmpty(req.user.coverphoto)) {
+		}
+
+		// Find and delete all upload documents and files
+		Upload.find({ user: req.user.id })
+			.then(uploads => {
+				for (const upload of uploads) {
+				}
+			})
+			.catch();
+
+		// Find and delete all posts. post uploads should have been deleted in the previous step.
+		Post.find({ user: req.user.id })
+			.then(posts => {
+				for (const post of posts) {
+				}
+			})
+			.catch();
+
+		// Find and delete all comments. post uploads should have been deleted in the previous step.
+		Comment.find({ user: req.user.id })
+			.then(comments => {
+				for (const comment of comments) {
+				}
+			})
+			.catch();
+
+		// Find reports
+		user.remove();
+		// Sign out user and return to landing page.
+	}
+);
 
 module.exports = router;
+
+// TODO - add 1 to reputation for like of post/comment/upload
+// TODO - remove 1 from reputation for unlike

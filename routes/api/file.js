@@ -5,7 +5,7 @@ const fs = require('fs');
 
 // Load models
 const Upload = require('../../models/Upload');
-const User = require('../../models/User');
+const User = require('../../models/User').User;
 
 // Load multer storage middleware method
 const fileUpload = require('../../src/modules/fileUpload');

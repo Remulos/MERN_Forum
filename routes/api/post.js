@@ -29,13 +29,7 @@ router.post(
 			.map(division => division.name)
 			.indexOf(req.body.division);
 
-		if (divIndex === -1) {
-			res.status(401).json({
-				Error: `You must be a member of ${
-					req.body.division
-				} Division to post here.`,
-			});
-		} else {
+		if (divIndex !== -1 || req.user.role === 'Admin') {
 			const newPost = new Post({
 				user: req.user.id,
 				title: req.body.title,
@@ -71,6 +65,12 @@ router.post(
 					.then(post => res.status(200).json(post))
 					.catch(err => res.status(400).json(err));
 			}
+		} else {
+			res.status(401).json({
+				Error: `You must be a member of ${
+					req.body.division
+				} Division to post here.`,
+			});
 		}
 	}
 );
@@ -343,7 +343,7 @@ router.delete(
 );
 
 // @route		GET post/user/:id
-// @desc		Delete comment from post,
+// @desc		Get all of a users posts
 // @access	Private
 router.get(
 	'/user/:id',

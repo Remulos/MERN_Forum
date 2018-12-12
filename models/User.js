@@ -153,10 +153,6 @@ const UserSchema = new Schema({
 		default: 0,
 	},
 	interests: [{ type: String }],
-	warningpoints: {
-		type: Number,
-		default: 0,
-	},
 	following: [
 		{
 			type: Schema.Types.ObjectId,
@@ -176,10 +172,6 @@ const UserSchema = new Schema({
 	date: {
 		type: Date,
 		default: Date.now,
-	},
-	contentcount: {
-		type: Number,
-		default: 0,
 	},
 	allowfollow: {
 		type: Boolean,
@@ -216,4 +208,7 @@ const UserSchema = new Schema({
 
 UserSchema.plugin(require('mongoose-paginate'));
 
-module.exports = User = mongoose.model('user', UserSchema);
+const ArchivedUser = mongoose.model('archivedUser', UserSchema);
+const User = mongoose.model('user', UserSchema);
+
+module.exports = { User, ArchivedUser };

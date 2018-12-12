@@ -5,11 +5,11 @@ const passport = require('passport');
 const scheduler = require('node-schedule');
 const fs = require('fs');
 
-const isEmpty = require('./src/modules/is-empty');
-
 const app = express();
 
-const User = require('./models/User');
+const isEmpty = require('./src/modules/is-empty');
+
+const User = require('./models/User').User;
 const Division = require('./models/Division');
 
 // bodyParser middleware
@@ -29,6 +29,7 @@ app.use('/post', require('./routes/api/post'));
 app.use('/file', require('./routes/api/file'));
 app.use('/admin', require('./routes/api/admin'));
 app.use('/report', require('./routes/api/report'));
+app.use('/apply', require('./routes/api/apply'));
 
 const uri = require('./config/keys').mongoURI;
 

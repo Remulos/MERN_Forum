@@ -17,6 +17,9 @@ const ReportSchema = new Schema({
 	item: {
 		type: Schema.Types.ObjectId,
 	},
+	itemowner: {
+		type: Schema.Types.ObjectId,
+	},
 	type: {
 		type: String,
 		required: true,

@@ -5,12 +5,16 @@ const recursive = require('recursive-readdir');
 const fs = require('fs');
 
 // Load models
-const User = require('../../models/User');
+const User = require('../../models/User').User;
 const Post = require('../../models/Post');
 const Upload = require('../../models/Upload');
-const Report = require('../../models/Report');
+const Report = require('../../models/Report').Report;
+const ArchivedReport = require('../../models/Report').ArchivedReport;
 const Comment = require('../../models/Comment');
 const Division = require('../../models/Division');
+const Application = require('../../models/Application').Application;
+const ArchivedApplication = require('../../models/Application')
+	.ArchivedApplication;
 
 const requireRole = require('../../src/modules/requireRole');
 const ifFile = require('../../src/modules/ifFile');
@@ -101,12 +105,42 @@ router.get(
 	}
 );
 
+// @route   GET admin/total-reports/resolved
+// @desc    Get total number of archived reports in file system
+// @access  Admin
+router.get(
+	'/total-reports/resolved',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		ArchivedReport.countDocuments((err, count) => {
+			if (err) res.json(err);
+			else res.json(count);
+		});
+	}
+);
+
+// @route   GET admin/total-applications/
+// @desc    Get total number of unresolved applications
+// @access  Admin
+router.get(
+	'/total-applications',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Application.countDocuments((err, count) => {
+			if (err) res.json(err);
+			else res.json(count);
+		});
+	}
+);
+
 // @route   GET admin/users/find?handle&page
 // @desc    Find users by handle
 // @access  Admin
 // TODO - Remove user password from returned information
 router.get(
-	'/users/find?handle&page',
+	'/users/find',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
 	(req, res) => {
@@ -164,6 +198,7 @@ router.put(
 		if (req.body.email) accountSettings.email = req.body.email;
 		if (req.body.dob) accountSettings.dob = req.body.dob;
 		if (req.body.timezone) accountSettings.timezone = req.body.timezone;
+		if (req.body.role) accountSettings.role = req.body.role;
 		if (req.body.signature) accountSettings.signature = req.body.signature;
 
 		accountSettings.preferences = {};
@@ -243,6 +278,8 @@ router.put(
 		if (typeof req.body.interests !== 'undefined') {
 			accountSettings.interests = req.body.interests.split(',');
 		}
+
+		if (req.body.division) accountSettings.divisions = req.body.divisions;
 
 		User.findById(req.params.id, (err, user) => {
 			if (err) res.status(404).json(err);
@@ -371,16 +408,16 @@ router.put(
 	}
 );
 
-// @route   DELETE admin/upload/remove?upload
+// @route   DELETE admin/upload/remove/:id
 // @desc    Find user upload and delete it.
 // @access  Admin
 router.delete(
-	'/upload/remove',
+	'/upload/remove/:id',
 	passport.authenticate('jwt', { session: false }),
 	requireRole('Admin'),
 	(req, res) => {
 		// Make sure an upload document exists with the provided id.
-		Upload.findByIdAndRemove(req.body.id, (err, upload) => {
+		Upload.findByIdAndRemove(req.params.id, (err, upload) => {
 			if (err) res.status(404).json(err);
 			else {
 				// Find any user who is using this upload as an avatar or cover photo.
@@ -413,49 +450,7 @@ router.delete(
 	}
 );
 
-// @route   DELETE admin/upload/remove?upload
-// @desc    Find user upload and delete it.
-// @access  Admin
-router.delete(
-	'/upload/remove',
-	passport.authenticate('jwt', { session: false }),
-	requireRole('Admin'),
-	(req, res) => {
-		// Make sure an upload document exists with the provided id.
-		Upload.findByIdAndRemove(req.query.upload, (err, upload) => {
-			if (err) res.status(404).json(err);
-			else {
-				// Find any user who is using this upload as an avatar or cover photo.
-				User.findOne(
-					{
-						$or: [
-							{ avatar: upload._id },
-							{ coverphoto: upload._id },
-						],
-					},
-					(err, user) => {
-						if (err) res.status(404).json(err);
-						if (user.avatar.toString() === upload._id.toString()) {
-							user.avatar = undefined;
-						} else if (
-							user.coverphoto.toString() === upload._id.toString()
-						) {
-							user.coverphoto = undefined;
-						}
-						user.save()
-							.then(user => res.json(user))
-							.catch(err => res.json(err));
-					}
-				);
-				fs.unlink(upload.path, err => {
-					if (err) res.json(err);
-				});
-			}
-		});
-	}
-);
-
-// @route		POST /admin/user/unban:id/:ban
+// @route		PUT admin/user/unban/:id/:ban
 // @desc		Find user and remove ban from account
 // @access	Admin
 router.put(
@@ -488,22 +483,41 @@ router.put(
 	}
 );
 
-// @route		GET /admin/reports
+// @route		GET admin/reports/?page&handle&reporter&catagory&type
 // @desc		Retrieve all reports
 // @access	Admin
 router.get(
 	'/reports',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
-		const skip = (req.query.page - 1) * 25;
+		const options = {
+			limit: 25,
+			populate: {
+				path: 'user',
+				select:
+					'name handle email dob registerdate interests lastloggedin',
+			},
+		};
+		if (req.query.page) options.page = req.query.page;
+
+		const search = {};
+		if (req.query.handle)
+			search.itemowner = { $regex: req.query.itemowner, $options: 'i' };
+		if (req.query.reporter)
+			search.reporter = { $regex: req.query.reporter, $options: 'i' };
+		if (req.query.category)
+			search.category = { $regex: req.query.category, $options: 'i' };
+		if (req.query.type)
+			search.type = { $regex: req.query.type, $options: 'i' };
+
 		// Find all reports
-		Report.find({}, null, [{ limit: 25 }, { skip: skip }])
+		Report.paginate(search, options)
 			.then(reports => {
 				const returnPopulatedReports = async () => {
 					const populateReports = async () => {
 						const foundReports = [];
 
-						for (const report of reports) {
+						for (const report of reports.docs) {
 							const reportItem = {
 								reporter: report.reporter,
 								category: report.category,
@@ -622,7 +636,7 @@ router.put(
 	}
 );
 
-// @route		PUT admin/report/:id
+// @route		PUT admin/report/archive/:id
 // @desc		Move report to completed collection
 // @access	Admin
 router.put(
@@ -740,8 +754,8 @@ router.post(
 	}
 );
 
-// @route		POST /admin/division
-// @desc		Add division to array
+// @route		DELETE /admin/division
+// @desc		Remove division from array
 // @access	Admin
 router.delete(
 	'/division',
@@ -765,5 +779,75 @@ router.delete(
 		});
 	}
 );
+
+// @route		GET admin/applications
+// @desc		Get all open applications
+// @access	Admin
+router.get(
+	'/applications',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		const options = {
+			limit: 25,
+			populate: {
+				path: 'user',
+				select:
+					'name handle email dob registerdate interests lastloggedin',
+			},
+		};
+		if (req.query.page) options.page = req.query.page;
+
+		Application.paginate({}, options)
+			.then(applications => res.json(applications))
+			.catch(err => res.json(err));
+	}
+);
+
+// @route		GET admin/application/:id
+// @desc		Get open application
+// @access	Admin
+router.get(
+	'/application/:id',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Application.findById(req.params.id)
+			.then(application => res.json(application))
+			.catch(err => res.json(err));
+	}
+);
+
+// @route		PUT admin/application/:id
+// @desc		Approve application and add Member to users divisions array
+// @access	Admin
+router.put(
+	'/application/:id',
+	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
+	(req, res) => {
+		Application.findByIdAndDelete(req.params.id).then(application => {
+			User.findById(application.user).then(user => {
+				user.divisions.push({ name: 'Member' });
+				user.save().catch(err => res.json(err));
+			});
+			const archivedApplication = new ArchivedApplication({
+				user: application.user,
+				date: application.date,
+				message: application.date,
+			});
+
+			archivedApplication
+				.save()
+				.then(application => res.json(application))
+				.catch(err => res.json(err));
+		});
+		// TODO - message user that application has been approved.
+	}
+);
+
+// @route		GET admin/user/reports/:id
+// @desc		Retrieve all reports about a certain user
+// @access	Admin
 
 module.exports = router;

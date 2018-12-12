@@ -23,6 +23,7 @@ router.post(
 			text: req.body.text,
 			item: req.params.id,
 			type: req.body.type,
+			itemowner: req.user.id,
 		});
 		const status = {
 			date: Date.now(),
