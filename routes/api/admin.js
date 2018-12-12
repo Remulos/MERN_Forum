@@ -519,6 +519,7 @@ router.get(
 
 						for (const report of reports.docs) {
 							const reportItem = {
+								id: report._id,
 								reporter: report.reporter,
 								category: report.category,
 								text: report.text,
@@ -645,19 +646,20 @@ router.put(
 	requireRole('Admin'),
 	(req, res) => {
 		Report.findByIdAndDelete(req.params.id)
-			.then()
-			.catch(err => res.json(err));
-		const archivedReport = new ArchivedReport({
-			reporter: report.reporter,
-			category: report.category,
-			text: report.text,
-			item: report.item,
-			type: report.type,
-			status: report.status,
-		});
-		archivedReport
-			.save()
-			.then(archivedReport => res.json(archivedReport.id))
+			.then(report => {
+				const archivedReport = new ArchivedReport({
+					reporter: report.reporter,
+					category: report.category,
+					text: report.text,
+					item: report.item,
+					type: report.type,
+					status: report.status,
+				});
+				archivedReport
+					.save()
+					.then(archivedReport => res.json(archivedReport.id))
+					.catch(err => res.json(err));
+			})
 			.catch(err => res.json(err));
 	}
 );
