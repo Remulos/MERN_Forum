@@ -21,10 +21,8 @@ const CommentSchema = new Schema({
 	},
 	attachments: [
 		{
-			upload: {
-				type: Schema.Types.ObjectId,
-				ref: 'upload',
-			},
+			type: Schema.Types.ObjectId,
+			ref: 'upload',
 		},
 	],
 });

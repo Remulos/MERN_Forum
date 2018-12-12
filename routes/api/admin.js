@@ -740,7 +740,6 @@ router.post(
 	}
 );
 
-// TODO - Remove devision route
 // @route		POST /admin/division
 // @desc		Add division to array
 // @access	Admin

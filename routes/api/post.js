@@ -165,7 +165,7 @@ router.put(
 // @route   DELETE post/:id
 // @desc    Delete post
 // @access  Private
-router.post(
+router.delete(
 	'/:id',
 	passport.authenticate('jwt', { session: false }),
 	(req, res) => {
@@ -175,11 +175,51 @@ router.post(
 					post.user._id.toHexString() === req.user.id ||
 					req.user.role === 'Admin'
 				) {
-					// TODO - Remove files and uploads
-					post.remove();
+					if (!isEmpty(post.attachments)) {
+						for (const file of post.attachments) {
+							console.log(file);
+							Upload.findByIdAndDelete(file)
+								.then(upload => {
+									fs.unlink(upload.path, err => {
+										if (err) res.status(404).json(err);
+									});
+								})
+								.catch(err => console.error(err));
+						}
+					}
+					if (!isEmpty(post.comments)) {
+						for (const comment of post.comments) {
+							Comment.findByIdAndDelete(comment)
+								.then(comment => {
+									if (!isEmpty(comment.attachments)) {
+										for (const file of comment.attachments) {
+											Upload.findByIdAndDelete(file)
+												.then(upload => {
+													fs.unlink(
+														upload.path,
+														err => {
+															if (err)
+																console.error(
+																	err
+																);
+														}
+													);
+												})
+												.catch(err =>
+													console.error(err)
+												);
+										}
+									}
+								})
+								.catch(err => console.error(err));
+						}
+					}
+					post.remove()
+						.then(post => res.json('Post Deleted \n' + post))
+						.catch(err => console.error(err));
 				}
 			})
-			.catch(err => res.json(err));
+			.catch(err => console.error(err));
 	}
 );
 
