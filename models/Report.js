@@ -24,6 +24,10 @@ const ReportSchema = new Schema({
 		type: String,
 		required: true,
 	},
+	date:{
+		type: Date,
+		default: Date.now,
+	},
 	status: [
 		{
 			date: {

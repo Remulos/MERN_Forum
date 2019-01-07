@@ -75,11 +75,20 @@ router.post(
 	}
 );
 
-// @route   GET post/Public
+// @route   GET post/Public?page&sort
 // @desc    Get all posts
 // @access  Public
 router.get('/Public', (req, res) => {
-	Post.find({ division: 'Public' })
+	const options = {
+		limit: 25,
+		populate: {
+			path: 'user',
+			select: 'handle avatar',
+		},
+	};
+	if (req.query.page) options.page = req.query.page;
+	if (req.body.sort) options.sort = { date: req.query.sort };
+	Post.paginate({ division: 'Public' }, options)
 		.then(posts => res.json(posts))
 		.catch(err => res.json(err));
 });
@@ -93,8 +102,13 @@ router.get(
 	(req, res) => {
 		const options = {
 			limit: 25,
+			populate: {
+				path: 'user',
+				select: 'handle avatar',
+			},
 		};
 		if (req.query.page) options.page = req.query.page;
+		if (req.body.sort) options.sort = { date: req.query.sort };
 		console.log(options);
 		Post.paginate({ division: req.params.division }, options)
 			.then(posts => res.json(posts.docs))

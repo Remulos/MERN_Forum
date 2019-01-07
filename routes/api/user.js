@@ -217,7 +217,7 @@ router.get(
 	}
 );
 
-// @route   GET user/find?handle&page
+// @route   GET user/find?handle&page&sort
 // @desc    Find users by handle
 // @access  Private
 router.get(
@@ -230,6 +230,7 @@ router.get(
 			populate: { path: 'avatar', select: 'path filename' },
 		};
 		if (req.query.page) options.page = req.query.page;
+		if (req.query.sort) options.sort = { handle: req.query.sort };
 		// Find all users with handles matching the regular expression of the request query parameters.
 		User.paginate(
 			{ handle: { $regex: req.query.handle, $options: 'i' } },
@@ -249,7 +250,12 @@ router.get(
 						users.push(foundUser);
 					});
 
-					res.status(200).json(users);
+					res.status(200).json({
+						Page: user.page,
+						OfPages: user.pages,
+						TotUsers: user.total,
+						users: users,
+					});
 				};
 				getSearchData();
 			})

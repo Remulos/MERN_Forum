@@ -27,7 +27,7 @@ router.post(
 		});
 		const status = {
 			date: Date.now(),
-			status: req.body.status,
+			status: 'Opened',
 		};
 
 		newReport.status.push(status);

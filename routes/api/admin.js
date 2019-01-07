@@ -135,29 +135,6 @@ router.get(
 	}
 );
 
-// @route   GET admin/users/find?handle&page
-// @desc    Find users by handle
-// @access  Admin
-// TODO - Remove user password from returned information
-router.get(
-	'/users/find',
-	passport.authenticate('jwt', { session: false }),
-	requireRole('Admin'),
-	(req, res) => {
-		const skip = (req.query.page - 1) * 25;
-		// Search entire 'users' collection by handle for the regular expression of the search query
-		User.find(
-			{ handle: { $regex: req.query.handle, $options: 'i' } },
-			null,
-			[{ limit: 25 }, { skip: skip }]
-		)
-			.then(user => {
-				res.status(200).json(user);
-			})
-			.catch(err => res.status(404).json({ Error: 'No users found.' }));
-	}
-);
-
 // @route   GET admin/user/:id
 // @desc    Find user
 // @access  Admin
@@ -483,12 +460,13 @@ router.put(
 	}
 );
 
-// @route		GET admin/reports/?page&handle&reporter&catagory&type
+// @route		GET admin/reports/?page&handle&reporter&division&type&sort
 // @desc		Retrieve all reports
 // @access	Admin
 router.get(
 	'/reports',
 	passport.authenticate('jwt', { session: false }),
+	requireRole('Admin'),
 	(req, res) => {
 		const options = {
 			limit: 25,
@@ -499,14 +477,13 @@ router.get(
 			},
 		};
 		if (req.query.page) options.page = req.query.page;
+		if (req.query.sort) options.sort = { date: req.query.sort };
 
 		const search = {};
 		if (req.query.handle)
 			search.itemowner = { $regex: req.query.itemowner, $options: 'i' };
-		if (req.query.reporter)
-			search.reporter = { $regex: req.query.reporter, $options: 'i' };
 		if (req.query.category)
-			search.category = { $regex: req.query.category, $options: 'i' };
+			search.division = { $regex: req.query.division, $options: 'i' };
 		if (req.query.type)
 			search.type = { $regex: req.query.type, $options: 'i' };
 
@@ -782,7 +759,7 @@ router.delete(
 	}
 );
 
-// @route		GET admin/applications
+// @route		GET admin/applications?page&sort
 // @desc		Get all open applications
 // @access	Admin
 router.get(
@@ -799,6 +776,7 @@ router.get(
 			},
 		};
 		if (req.query.page) options.page = req.query.page;
+		if (req.query.sort) options.sort = { date: req.query.sort };
 
 		Application.paginate({}, options)
 			.then(applications => res.json(applications))
