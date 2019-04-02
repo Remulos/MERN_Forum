@@ -1,0 +1,11 @@
+$theme-colors: (
+	"primary": #dc4b43,
+	"secondary": #69686c,
+	"success": #8ac926,
+	"info": #17335b,
+	"warning": #ffca3a,
+	"danger": #841c26,
+	);
+	
+	// import whole package for dev, use specific imports for prod!!
+	@import '../node_modules/bootstrap/scss/bootstrap';
