@@ -11,6 +11,9 @@ const fileUpload = require('../../src/modules/fileUpload');
 const isEmpty = require('../../src/modules/is-empty');
 const checkBanned = require('../../src/modules/checkBanned');
 
+// Load Validation
+const validatePostInput = require('../../validation/post');
+
 // @route   GET post/test
 // @desc    Test post route
 // @access  Public
@@ -25,6 +28,13 @@ router.post(
 	checkBanned(),
 	fileUpload.array('file'),
 	(req, res) => {
+		const { errors, isValid } = validatePostInput;
+
+		if (!isValid) {
+			return res.status(400).json({ errors });
+		}
+
+		// Check user has permission to post in this forum
 		const divIndex = req.user.divisions
 			.map(division => division.name)
 			.indexOf(req.body.division);

@@ -2,14 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
-const scheduler = require('node-schedule');
-const fs = require('fs');
 
 const app = express();
 
 const isEmpty = require('./src/modules/is-empty');
 
-const User = require('./models/User').User;
+const User = require('./models/User');
 const Division = require('./models/Division');
 
 // bodyParser middleware
@@ -35,10 +33,7 @@ const uri = require('./config/keys').mongoURI;
 
 // Connect to MongoDB
 mongoose
-	.connect(
-		uri,
-		{ useNewUrlParser: true }
-	)
+	.connect(uri, { useNewUrlParser: true })
 	.then()
 	.catch(err => console.log(err));
 
@@ -81,6 +76,6 @@ process.on('SIGINT', () => {
 	});
 });
 
-const port = process.env.PORT || 5000;
+const port = process.env.port || 5000;
 
 app.listen(port, () => console.log(`Server started on port ${port}`));

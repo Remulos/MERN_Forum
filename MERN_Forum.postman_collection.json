@@ -1,0 +1,2634 @@
+{
+	"info": {
+		"_postman_id": "149fcfb7-b093-4000-8aee-e5434c5ebd85",
+		"name": "MERN_Forum",
+		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Edit Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": "12h expiry",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "handle",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "dob",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "signature",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "timezone",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "newsletter",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "autofollowpost",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "autofollowreply",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "autofollowmethod",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "shownotificationpopup",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "singleemailbetweenvisit",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "playnotificationsound",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "receivemessage",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "addedtoconvo",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "contentfollownew",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "contentfollowcomment",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "contentfollowreview",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "personfollowpost",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfquoted",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfmention",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfcontentrep",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selffollow",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfprofilepost",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "statusreply",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "personfollowstatus",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfclubinvite",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfclubrequestresponse",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "memberclubrequest",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "memberjoinclub",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "eventreminders",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "location",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "interests",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "coverphoto",
+									"type": "file",
+									"src": ""
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/user/edit",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user",
+								"edit"
+							]
+						},
+						"description": "// @route   PUT user/edit\r\n// @desc    Edit current user model values\r\n// @access  Private"
+					},
+					"response": []
+				},
+				{
+					"name": "Account",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": "12h expiry",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:5000/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user"
+							]
+						},
+						"description": "// @route   GET user/\r\n// @desc    Get current user account settings\r\n// @access  Private"
+					},
+					"response": []
+				},
+				{
+					"name": "User Test",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/user/test",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user",
+								"test"
+							]
+						},
+						"description": "// @route   GET user/test\r\n// @desc    Test route\r\n// @access  Public"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "15847238-1b92-4b44-bfa9-ac08bcc36560",
+								"exec": [
+									"pm.environment.set(\"token\", JSON.parse(responseBody).token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "",
+								"description": "12h expiry",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"description": "required",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/user/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user",
+								"login"
+							]
+						},
+						"description": "// @route   POST user/login\r\n// @desc    Log in existing user\r\n// @access  Public"
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7e6f5304-8692-4afd-812a-d9a3b4de65aa",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6b314075-aa3c-49fe-b2c0-7d49800371ba",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "{{name}}",
+									"type": "text"
+								},
+								{
+									"key": "handle",
+									"value": "{{handle}}",
+									"type": "text"
+								},
+								{
+									"key": "dob",
+									"value": "{{dob}}",
+									"type": "text"
+								},
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "coverphoto",
+									"type": "file",
+									"src": ""
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/user/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user",
+								"register"
+							]
+						},
+						"description": "// @route   POST user/register\r\n// @desc    Register new user\r\n// @access  Public"
+					},
+					"response": []
+				},
+				{
+					"name": "Find Handle",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b3975408-5a45-4a45-bb23-1fcd2ade1e1c",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "5349ff90-67e7-4f1a-beda-c89758c2db63",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "handle",
+									"value": "Test",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "id",
+									"value": "5c007e31ce296e6248b78e9e",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/user/find?handle=Test&page=1&sort=desc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user",
+								"find"
+							],
+							"query": [
+								{
+									"key": "handle",
+									"value": "Test"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "sort",
+									"value": "desc"
+								}
+							]
+						},
+						"description": "// @route   GET user/find?handle&page\r\n// @desc    Find users by handle\r\n// @access  Private"
+					},
+					"response": []
+				},
+				{
+					"name": "User Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/user/profile/:handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user",
+								"profile",
+								":handle"
+							],
+							"variable": [
+								{
+									"key": "handle",
+									"value": ""
+								}
+							]
+						},
+						"description": "// @route   GET user/profile/:handle\r\n// @desc    View user profile\r\n// @access  Public"
+					},
+					"response": []
+				},
+				{
+					"name": "User Suspend Account",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/user/suspend/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user",
+								"suspend",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c0aa2d7e978422af45d0a69"
+								}
+							]
+						},
+						"description": "/user/suspent/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/user/delete/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"user",
+								"delete",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "// @route   DELETE user/delete/:id\r\n// @desc   Delete user data. All posts, comments and uploads will be kept to ensure continuity in conversations unless previously deleted.\r\n// @access  Private"
+					},
+					"response": []
+				}
+			],
+			"description": "/user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3249be22-d8fb-4da0-a331-f79d33f06443",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "00160eb5-aa03-48ff-a25a-97ef2c1ca5f3",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Post",
+			"item": [
+				{
+					"name": "Post Test",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/test",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								"test"
+							]
+						},
+						"description": "GET /post/test"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "test",
+									"type": "text"
+								},
+								{
+									"key": "text",
+									"value": "test",
+									"type": "text"
+								},
+								{
+									"key": "division",
+									"value": "Recruit",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": ""
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								"new"
+							]
+						},
+						"description": "/post"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Post",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "title",
+									"value": "Test Title 2",
+									"type": "text"
+								},
+								{
+									"key": "text",
+									"value": "This is an edited test post",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/edit/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								"edit",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/post/edit/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Post",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c108a20bd85f23fbc400b60"
+								}
+							]
+						},
+						"description": "/post/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "text",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": ""
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/:id/comment",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								":id",
+								"comment"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/post/:id/comment"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/comment/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								"comment",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/post/comment/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Public Post",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:5000/post/id/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								"id",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/post/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Private Post",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:5000/post/id/private/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								"id",
+								"private",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c0f31d887068f2228204a36"
+								}
+							]
+						},
+						"description": "/post/private:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Public Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/Public",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								"Public"
+							]
+						},
+						"description": "/post/Public"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/user/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c0f20e6aa143b0534715e17"
+								}
+							]
+						},
+						"description": "/post/user/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Posts from Devision",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/post/:division/?page=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"post",
+								":division",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							],
+							"variable": [
+								{
+									"key": "division",
+									"value": "Member"
+								}
+							]
+						},
+						"description": "/post/:devision/?page"
+					},
+					"response": []
+				}
+			],
+			"description": "/post"
+		},
+		{
+			"name": "Files",
+			"item": [
+				{
+					"name": "Upload Array",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "52781ed4-3798-46c5-bf61-97f7aa2f9f8f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "58698a2f-bcf7-4944-8dc2-4071d25059ee",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": ""
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/file",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"file"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "52781ed4-3798-46c5-bf61-97f7aa2f9f8f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "58698a2f-bcf7-4944-8dc2-4071d25059ee",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:5000/file/delete/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"file",
+								"delete",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/file"
+					},
+					"response": []
+				},
+				{
+					"name": "Get File",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/file/uploads/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"file",
+								"uploads",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c02c4dce05fe224c8ffb149"
+								}
+							]
+						},
+						"description": "/file/uploads/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users Files",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/file/uploads/user/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"file",
+								"uploads",
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/file/uploads/user/:id"
+					},
+					"response": []
+				}
+			],
+			"description": "/file"
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Users Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/users-total",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"users-total"
+							]
+						},
+						"description": "/admin/user"
+					},
+					"response": []
+				},
+				{
+					"name": "Posts Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/posts-total",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"posts-total"
+							]
+						},
+						"description": "/admin/posts"
+					},
+					"response": []
+				},
+				{
+					"name": "Uploads Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/total-uploads",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"total-uploads"
+							]
+						},
+						"description": "/admin/total-uploads"
+					},
+					"response": []
+				},
+				{
+					"name": "Applications Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/total-applications",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"total-applications"
+							]
+						},
+						"description": "// @route   GET admin/total-applications/\r\n// @desc    Get total number of unresolved applications\r\n// @access  Admin"
+					},
+					"response": []
+				},
+				{
+					"name": "Resolved Reports Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/total-reports/resolved",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"total-reports",
+								"resolved"
+							]
+						},
+						"description": "// @route   GET admin/total-reports/resolved\r\n// @desc    Get total number of archived reports in file system\r\n// @access  Admin"
+					},
+					"response": []
+				},
+				{
+					"name": "Applications List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/applications?page&sort",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"applications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": null
+								},
+								{
+									"key": "sort",
+									"value": null
+								}
+							]
+						},
+						"description": "// @route\t\tGET admin/applications\r\n// @desc\t\tGet all open applications\r\n// @access\tAdmin"
+					},
+					"response": []
+				},
+				{
+					"name": "Application Review",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/application/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"application",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "// @route\t\tGET admin/application/:id\r\n// @desc\t\tGet open application\r\n// @access\tAdmin"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Application",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/application/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"application",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "// @route\t\tPUT admin/application/:id\r\n// @desc\t\tApprove application and add Member to users divisions array\r\n// @access\tAdmin"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:5000/admin/user/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/admin/user"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "handle",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "dob",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "signature",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "timezone",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "newsletter",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "autofollowpost",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "autofollowreply",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "autofollowmethod",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "shownotificationpopup",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "singleemailbetweenvisit",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "playnotificationsound",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "receivemessage",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "addedtoconvo",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "contentfollownew",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "contentfollowcomment",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "contentfollowreview",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "personfollowpost",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfquoted",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfmention",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfcontentrep",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selffollow",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfprofilepost",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "statusreply",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "personfollowstatus",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfclubinvite",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "selfclubrequestresponse",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "memberclubrequest",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "memberjoinclub",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "eventreminders",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "location",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "interests",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "coverphoto",
+									"type": "file",
+									"src": ""
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/user/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c08943312ee931ff84ea5c1"
+								}
+							]
+						},
+						"description": "/admin/user"
+					},
+					"response": []
+				},
+				{
+					"name": "User Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:5000/admin/user?id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"user"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": null
+								}
+							]
+						},
+						"description": "/admin/user"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove File",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/upload/remove/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"upload",
+								"remove",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/admin/upload/remove?upload"
+					},
+					"response": []
+				},
+				{
+					"name": "Reports List",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:5000/admin/reports?page=1&itemowner=&category=&type=&sort=asc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "itemowner",
+									"value": ""
+								},
+								{
+									"key": "reporter",
+									"value": null,
+									"description": "User ObjectId",
+									"disabled": true
+								},
+								{
+									"key": "category",
+									"value": ""
+								},
+								{
+									"key": "type",
+									"value": ""
+								},
+								{
+									"key": "sort",
+									"value": "asc"
+								}
+							]
+						},
+						"description": "/admin/reports"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Report Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "status",
+									"value": "",
+									"description": "String",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/report/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"report",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/admin/report/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Archive Report",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:5000/admin/report/archive/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"report",
+								"archive",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
+						"description": "/admin/report/archive/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Ban User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "reason",
+									"value": "bad behaviour",
+									"type": "text"
+								},
+								{
+									"key": "end",
+									"value": "2018-12-10",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/ban/user/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"ban",
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c0e5c0fb9653d1c9cdef200"
+								}
+							]
+						},
+						"description": "/admin/ban/user/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Ban",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "reason",
+									"value": "Good Behaviour",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/user/unban/:id/:ban",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"user",
+								"unban",
+								":id",
+								":ban"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c0e5c0fb9653d1c9cdef200"
+								},
+								{
+									"key": "ban",
+									"value": "5c0e68d63bb45a3e200baa57"
+								}
+							]
+						},
+						"description": "/admin/user/unban/:id/:ban"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Division",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "division",
+									"value": "Test4",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "test division",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/division",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"division"
+							]
+						},
+						"description": "/admin/division"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Division",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "division",
+									"value": "Test4",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "test division",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/admin/division",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"admin",
+								"division"
+							]
+						},
+						"description": "/admin/division"
+					},
+					"response": []
+				}
+			],
+			"description": "/admin"
+		},
+		{
+			"name": "Report",
+			"item": [
+				{
+					"name": "Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "category",
+									"value": "bad behaviour",
+									"description": "String",
+									"type": "text"
+								},
+								{
+									"key": "text",
+									"value": "it is a bad user",
+									"description": "String",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "User",
+									"description": "String",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/report/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"report",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "5c16358e6fc3840bb4dd62ed"
+								}
+							]
+						},
+						"description": "/report/:id"
+					},
+					"response": []
+				},
+				{
+					"name": "Report Test",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/report/test",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"report",
+								"test"
+							]
+						},
+						"description": "/report/test"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Apply",
+			"item": [
+				{
+					"name": "Test Apply Route",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/apply/test",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"apply",
+								"test"
+							]
+						},
+						"description": "/apply/test"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Application",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/apply/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"apply",
+								""
+							]
+						},
+						"description": "/apply/"
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Application",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "message",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/apply/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"apply",
+								""
+							]
+						},
+						"description": "// @route\t\tPOST apply/\r\n// @desc\t\tSubmit application to become full member\r\n// @access\tPrivate"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Application",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "message",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/apply/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"apply",
+								""
+							]
+						},
+						"description": "// @route\t\tPUT apply/\r\n// @desc\t\tEdit submitted application\r\n// @access\tPrivate"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Application",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/apply/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"apply",
+								""
+							]
+						},
+						"description": "// @route\t\tDELETE apply/\r\n// @desc\t\tDelete submitted application\r\n// @access\tPrivate"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,26 @@
+// import whole package for dev, use specific imports for prod!!
+@import '../../node_modules/bootstrap/scss/bootstrap';
+
+$primary: #ef9000;
+$secondary: #474747;
+$success: #c2efb3;
+$info: #e0e0ce;
+$warning: #e4572e;
+$danger: #ad343e;
+
+$theme-colors: (
+	'primary': #ef9000,
+	'secondary': #474747,
+	'success': #c2efb3,
+	'info': #e0e0ce,
+	'warning': #e4572e,
+	'danger': #ad343e,
+	'redAccent': #ad343e,
+	'greyAccent': #474747,
+	'blackAccent': #463f3a,
+	'whiteAccent': #e0e0ce,
+	'greenAccent': #c2efb3,
+);
+
+$body-bg: #463f3a;
+$body-color: $primary;

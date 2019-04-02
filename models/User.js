@@ -208,7 +208,9 @@ const UserSchema = new Schema({
 
 UserSchema.plugin(require('mongoose-paginate'));
 
-const ArchivedUser = mongoose.model('archivedUser', UserSchema);
-const User = mongoose.model('user', UserSchema);
+// const ArchivedUser = mongoose.model('archivedUser', UserSchema);
+// const User = mongoose.model('user', UserSchema);
 
-module.exports = { User, ArchivedUser };
+// module.exports = { User, ArchivedUser };
+
+module.exports = User = mongoose.model('user', UserSchema);

@@ -14,6 +14,10 @@ const encryptPassword = require('../../src/modules/encryptPassword');
 const ifFile = require('../../src/modules/ifFile');
 const isEmpty = require('../../src/modules/is-empty');
 
+// Validators
+const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
+
 // @route   GET user/test
 // @desc    Test route
 // @access  Public
@@ -29,7 +33,12 @@ router.post(
 		{ name: 'coverphoto', maxCount: 1 },
 	]),
 	(req, res) => {
-		const errors = {};
+		const { errors, isValid } = validateRegisterInput;
+
+		// Check Validation
+		if (!isValid) {
+			return res.status(400).json({ errors });
+		}
 
 		// Search existing users by email to see if account already exists.
 		User.findOne({ email: req.body.email }).then(user => {
@@ -56,8 +65,9 @@ router.post(
 							handle: req.body.handle,
 							email: req.body.email,
 							password: req.body.password,
-							date: req.body.date,
+							date: Date.now(),
 							dob: req.body.dob,
+							// take timezone from browser
 							timezone: req.body.timezone,
 							role: 'Civilian',
 							registerdate: Date.now(),
@@ -145,7 +155,13 @@ router.post(
 // @desc    Log in existing user
 // @access  Public
 router.post('/login', (req, res) => {
-	const errors = {};
+	const { errors, isValid } = validateLoginInput;
+
+	// Check validation
+	if (!isValid) {
+		return res.status(400).json({ errors });
+	}
+
 	const email = req.body.email;
 	const password = req.body.password;
 
